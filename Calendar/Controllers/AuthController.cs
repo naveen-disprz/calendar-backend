@@ -33,7 +33,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] UserLoginDto loginDto)
+    public async Task<IActionResult> Login(UserLoginDto loginDto)
     {
         try
         {

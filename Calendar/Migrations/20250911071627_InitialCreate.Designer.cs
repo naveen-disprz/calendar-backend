@@ -4,6 +4,7 @@ using Calendar.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Calendar.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250911071627_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -103,38 +106,6 @@ namespace Calendar.Migrations
                     b.HasKey("AppointmentTypeId");
 
                     b.ToTable("AppointmentTypes");
-
-                    b.HasData(
-                        new
-                        {
-                            AppointmentTypeId = 1,
-                            ColorCode = "#1E90FF",
-                            TypeName = "Sprint Planning"
-                        },
-                        new
-                        {
-                            AppointmentTypeId = 2,
-                            ColorCode = "#32CD32",
-                            TypeName = "Code Review"
-                        },
-                        new
-                        {
-                            AppointmentTypeId = 3,
-                            ColorCode = "#FFD700",
-                            TypeName = "Stand-up Meeting"
-                        },
-                        new
-                        {
-                            AppointmentTypeId = 4,
-                            ColorCode = "#FF4500",
-                            TypeName = "Client Demo"
-                        },
-                        new
-                        {
-                            AppointmentTypeId = 5,
-                            ColorCode = "#8A2BE2",
-                            TypeName = "Retrospective"
-                        });
                 });
 
             modelBuilder.Entity("Calendar.Models.RecurrenceRule", b =>

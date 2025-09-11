@@ -40,7 +40,7 @@ public class Appointment
     public RecurrenceRule? RecurrenceRule { get; set; }
 
     [ForeignKey(nameof(AppointmentType))] 
-    public Guid? AppointmentTypeId { get; set; }
+    public int? AppointmentTypeId { get; set; }
     
     public AppointmentType? AppointmentType { get; set; }
 } 

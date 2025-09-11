@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Calendar.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250911054239_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250911072329_AppointmentTypeData")]
+    partial class AppointmentTypeData
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -31,8 +31,8 @@ namespace Calendar.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
-                    b.Property<Guid?>("AppointmentTypeId")
-                        .HasColumnType("char(36)");
+                    b.Property<int?>("AppointmentTypeId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
@@ -88,9 +88,11 @@ namespace Calendar.Migrations
 
             modelBuilder.Entity("Calendar.Models.AppointmentType", b =>
                 {
-                    b.Property<Guid>("AppointmentTypeId")
+                    b.Property<int>("AppointmentTypeId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("AppointmentTypeId"));
 
                     b.Property<string>("ColorCode")
                         .IsRequired()
@@ -104,6 +106,38 @@ namespace Calendar.Migrations
                     b.HasKey("AppointmentTypeId");
 
                     b.ToTable("AppointmentTypes");
+
+                    b.HasData(
+                        new
+                        {
+                            AppointmentTypeId = 1,
+                            ColorCode = "#1E90FF",
+                            TypeName = "Sprint Planning"
+                        },
+                        new
+                        {
+                            AppointmentTypeId = 2,
+                            ColorCode = "#32CD32",
+                            TypeName = "Code Review"
+                        },
+                        new
+                        {
+                            AppointmentTypeId = 3,
+                            ColorCode = "#FFD700",
+                            TypeName = "Stand-up Meeting"
+                        },
+                        new
+                        {
+                            AppointmentTypeId = 4,
+                            ColorCode = "#FF4500",
+                            TypeName = "Client Demo"
+                        },
+                        new
+                        {
+                            AppointmentTypeId = 5,
+                            ColorCode = "#8A2BE2",
+                            TypeName = "Retrospective"
+                        });
                 });
 
             modelBuilder.Entity("Calendar.Models.RecurrenceRule", b =>

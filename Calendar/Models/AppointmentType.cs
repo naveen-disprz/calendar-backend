@@ -1,12 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Calendar.Models;
 
 public class AppointmentType
 {
-    [Key] 
-    public Guid AppointmentTypeId { get; set; } =  Guid.NewGuid();
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int AppointmentTypeId { get; set; }   // Auto-increment ID
 
     [Required, MaxLength(100)] 
     public string TypeName { get; set; } = string.Empty;

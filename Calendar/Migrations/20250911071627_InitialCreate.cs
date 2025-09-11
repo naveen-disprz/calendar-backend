@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -18,7 +19,8 @@ namespace Calendar.Migrations
                 name: "AppointmentTypes",
                 columns: table => new
                 {
-                    AppointmentTypeId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    AppointmentTypeId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     TypeName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     ColorCode = table.Column<string>(type: "longtext", nullable: false)
@@ -83,7 +85,7 @@ namespace Calendar.Migrations
                     UpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     CreatedByUserId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     RecurrenceRuleId = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
-                    AppointmentTypeId = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci")
+                    AppointmentTypeId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {

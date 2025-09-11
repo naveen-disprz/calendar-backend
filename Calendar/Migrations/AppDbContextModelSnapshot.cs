@@ -28,26 +28,29 @@ namespace Calendar.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
+                    b.Property<DateOnly>("AppointmentDate")
+                        .HasColumnType("date");
+
                     b.Property<int?>("AppointmentTypeId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<Guid>("CreatedByUserId")
-                        .HasColumnType("char(36)");
-
                     b.Property<string>("Description")
                         .HasColumnType("longtext");
 
-                    b.Property<DateTime>("EndTime")
-                        .HasColumnType("datetime(6)");
+                    b.Property<TimeOnly>("EndTime")
+                        .HasColumnType("time(6)");
 
-                    b.Property<Guid?>("RecurrenceRuleId")
+                    b.Property<Guid>("OrganizerId")
                         .HasColumnType("char(36)");
 
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("datetime(6)");
+                    b.Property<int?>("RecurrenceRuleId")
+                        .HasColumnType("int");
+
+                    b.Property<TimeOnly>("StartTime")
+                        .HasColumnType("time(6)");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -61,14 +64,14 @@ namespace Calendar.Migrations
 
                     b.HasIndex("AppointmentTypeId");
 
-                    b.HasIndex("CreatedByUserId");
+                    b.HasIndex("OrganizerId");
 
                     b.HasIndex("RecurrenceRuleId");
 
                     b.ToTable("Appointments");
                 });
 
-            modelBuilder.Entity("Calendar.Models.AppointmentParticipant", b =>
+            modelBuilder.Entity("Calendar.Models.Participant", b =>
                 {
                     b.Property<Guid>("AppointmentId")
                         .HasColumnType("char(36)");
@@ -80,68 +83,16 @@ namespace Calendar.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AppointmentParticipants");
-                });
-
-            modelBuilder.Entity("Calendar.Models.AppointmentType", b =>
-                {
-                    b.Property<int>("AppointmentTypeId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("AppointmentTypeId"));
-
-                    b.Property<string>("ColorCode")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("TypeName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.HasKey("AppointmentTypeId");
-
-                    b.ToTable("AppointmentTypes");
-
-                    b.HasData(
-                        new
-                        {
-                            AppointmentTypeId = 1,
-                            ColorCode = "#1E90FF",
-                            TypeName = "Sprint Planning"
-                        },
-                        new
-                        {
-                            AppointmentTypeId = 2,
-                            ColorCode = "#32CD32",
-                            TypeName = "Code Review"
-                        },
-                        new
-                        {
-                            AppointmentTypeId = 3,
-                            ColorCode = "#FFD700",
-                            TypeName = "Stand-up Meeting"
-                        },
-                        new
-                        {
-                            AppointmentTypeId = 4,
-                            ColorCode = "#FF4500",
-                            TypeName = "Client Demo"
-                        },
-                        new
-                        {
-                            AppointmentTypeId = 5,
-                            ColorCode = "#8A2BE2",
-                            TypeName = "Retrospective"
-                        });
+                    b.ToTable("Participants");
                 });
 
             modelBuilder.Entity("Calendar.Models.RecurrenceRule", b =>
                 {
-                    b.Property<Guid>("RecurrenceRuleId")
+                    b.Property<int>("RecurrenceRuleId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("RecurrenceRuleId"));
 
                     b.Property<int?>("Count")
                         .HasColumnType("int");
@@ -160,6 +111,28 @@ namespace Calendar.Migrations
                     b.HasKey("RecurrenceRuleId");
 
                     b.ToTable("RecurrenceRules");
+                });
+
+            modelBuilder.Entity("Calendar.Models.Type", b =>
+                {
+                    b.Property<int>("AppointmentTypeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("AppointmentTypeId"));
+
+                    b.Property<string>("ColorCode")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("TypeName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.HasKey("AppointmentTypeId");
+
+                    b.ToTable("Types");
                 });
 
             modelBuilder.Entity("Calendar.Models.User", b =>
@@ -197,13 +170,13 @@ namespace Calendar.Migrations
 
             modelBuilder.Entity("Calendar.Models.Appointment", b =>
                 {
-                    b.HasOne("Calendar.Models.AppointmentType", "AppointmentType")
+                    b.HasOne("Calendar.Models.Type", "AppointmentType")
                         .WithMany()
                         .HasForeignKey("AppointmentTypeId");
 
-                    b.HasOne("Calendar.Models.User", "CreatedByUser")
+                    b.HasOne("Calendar.Models.User", "Organizer")
                         .WithMany()
-                        .HasForeignKey("CreatedByUserId")
+                        .HasForeignKey("OrganizerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -213,14 +186,14 @@ namespace Calendar.Migrations
 
                     b.Navigation("AppointmentType");
 
-                    b.Navigation("CreatedByUser");
+                    b.Navigation("Organizer");
 
                     b.Navigation("RecurrenceRule");
                 });
 
-            modelBuilder.Entity("Calendar.Models.AppointmentParticipant", b =>
+            modelBuilder.Entity("Calendar.Models.Participant", b =>
                 {
-                    b.HasOne("Calendar.Models.Appointment", null)
+                    b.HasOne("Calendar.Models.Appointment", "Appointment")
                         .WithMany()
                         .HasForeignKey("AppointmentId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -231,6 +204,8 @@ namespace Calendar.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Appointment");
 
                     b.Navigation("User");
                 });

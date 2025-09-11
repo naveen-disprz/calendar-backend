@@ -1,5 +1,6 @@
 ﻿using Calendar.DTOs.User;
 using Calendar.Interfaces;
+using Calendar.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Calendar.Controllers;
@@ -8,19 +9,19 @@ namespace Calendar.Controllers;
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
-    private readonly IUserService _userService;
+    private readonly UserService _userService;
 
-    public AuthController(IUserService userService)
+    public AuthController(UserService userService)
     {
         _userService = userService;
     }
 
     [HttpPost("signup")]
-    public async Task<IActionResult> Signup(UserSignupDto signupDto)
+    public async Task<IActionResult> Signup(UserSignupRequestDto signupRequestDto)
     {
         try
         {
-            var result = await _userService.RegisterAsync(signupDto);
+            var result = await _userService.RegisterAsync(signupRequestDto);
             return Ok(result);
         }
         catch (Exception ex)
@@ -33,11 +34,11 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login(UserLoginDto loginDto)
+    public async Task<IActionResult> Login(UserLoginRequestDto loginRequestDto)
     {
         try
         {
-            var userResponse = await _userService.LoginAsync(loginDto);
+            var userResponse = await _userService.LoginAsync(loginRequestDto);
             return Ok(userResponse);
         }
         catch (Exception ex)
@@ -45,5 +46,4 @@ public class AuthController : ControllerBase
             return BadRequest(new { message = ex.Message });
         }
     }
-    
 }

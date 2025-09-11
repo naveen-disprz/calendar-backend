@@ -1,6 +1,6 @@
 ﻿namespace Calendar.DTOs.User;
 
-public class UserSignupDto
+public class UserSignupRequestDto
 {
     public string UserName { get; set; }  // required
     public string Email { get; set; }     // required

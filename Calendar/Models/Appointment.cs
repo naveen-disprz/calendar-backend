@@ -15,11 +15,16 @@ public class Appointment
 
     public string? Description { get; set; }
 
-    [Required] 
-    public DateTime StartTime { get; set; }
+    // 🔑 Date of the appointment
+    [Required]
+    public DateOnly AppointmentDate { get; set; }
 
-    [Required] 
-    public DateTime EndTime { get; set; }
+    // 🔑 Start and end times (time-only)
+    [Required]
+    public TimeOnly StartTime { get; set; }
+
+    [Required]
+    public TimeOnly EndTime { get; set; }
     
     // Timestamps
     [Required]
@@ -29,18 +34,18 @@ public class Appointment
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     // Foreign Keys
-    [ForeignKey(nameof(CreatedByUser))] 
-    public Guid CreatedByUserId { get; set; }
+    [ForeignKey(nameof(Organizer))] 
+    public Guid OrganizerId { get; set; }
     
-    public User CreatedByUser { get; set; }
+    public User Organizer { get; set; }
 
     [ForeignKey(nameof(RecurrenceRule))] 
-    public Guid? RecurrenceRuleId { get; set; }
+    public int? RecurrenceRuleId { get; set; }
     
     public RecurrenceRule? RecurrenceRule { get; set; }
 
     [ForeignKey(nameof(AppointmentType))] 
     public int? AppointmentTypeId { get; set; }
     
-    public AppointmentType? AppointmentType { get; set; }
+    public Type? AppointmentType { get; set; }
 } 

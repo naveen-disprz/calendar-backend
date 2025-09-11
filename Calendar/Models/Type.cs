@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Calendar.Models;
 
-public class AppointmentType
+public class Type
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

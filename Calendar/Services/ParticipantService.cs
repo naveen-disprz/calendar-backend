@@ -9,7 +9,8 @@ namespace Calendar.Services
         private readonly IParticipantRepository _participantRepository;
         private readonly IAppointmentRepository _appointmentRepository;
 
-        public ParticipantService(IParticipantRepository participantRepository, IAppointmentRepository appointmentRepository)
+        public ParticipantService(IParticipantRepository participantRepository,
+            IAppointmentRepository appointmentRepository)
         {
             _participantRepository = participantRepository;
             _appointmentRepository = appointmentRepository;
@@ -19,7 +20,7 @@ namespace Calendar.Services
         {
             return await _participantRepository.GetAllAsync();
         }
-        
+
         public async Task<List<User>> GetByAppointmentIdAsync(Guid appointmentId)
         {
             return await _participantRepository.GetByAppointmentIdAsync(appointmentId);
@@ -27,13 +28,19 @@ namespace Calendar.Services
 
         public async Task<Boolean> checkAvailability(CheckAvailabilityRequestDto checkAvailabilityRequestDto)
         {
-            var appointmentsList1 = await _appointmentRepository.GetByUserIdAsync(checkAvailabilityRequestDto.ParticipantId.ToString());
-            var appointmentsList2 = await _participantRepository.GetAppointmentsByIdAsync(checkAvailabilityRequestDto.ParticipantId.ToString());
-            
+            var appointmentsList1 = await _appointmentRepository.GetByUserIdAsync(
+                checkAvailabilityRequestDto.ParticipantId.ToString(), checkAvailabilityRequestDto.AppointmentDate,
+                checkAvailabilityRequestDto.AppointmentDate);
+            var appointmentsList2 =
+                await _participantRepository.GetAppointmentsByIdAsync(
+                    checkAvailabilityRequestDto.ParticipantId.ToString(), checkAvailabilityRequestDto.AppointmentDate,
+                    checkAvailabilityRequestDto.AppointmentDate);
+
             foreach (var app in appointmentsList1)
             {
                 if (app.AppointmentDate == checkAvailabilityRequestDto.AppointmentDate &&
-                    (checkAvailabilityRequestDto.StartTime < app.EndTime && checkAvailabilityRequestDto.EndTime > app.StartTime))
+                    (checkAvailabilityRequestDto.StartTime < app.EndTime &&
+                     checkAvailabilityRequestDto.EndTime > app.StartTime))
                 {
                     return false;
                 }
@@ -42,12 +49,13 @@ namespace Calendar.Services
             foreach (var app in appointmentsList2)
             {
                 if (app.AppointmentDate == checkAvailabilityRequestDto.AppointmentDate &&
-                    (checkAvailabilityRequestDto.StartTime < app.EndTime && checkAvailabilityRequestDto.EndTime > app.StartTime))
+                    (checkAvailabilityRequestDto.StartTime < app.EndTime &&
+                     checkAvailabilityRequestDto.EndTime > app.StartTime))
                 {
                     return false;
                 }
             }
-            
+
             return true;
         }
     }

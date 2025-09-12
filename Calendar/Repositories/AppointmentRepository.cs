@@ -13,12 +13,14 @@ public class AppointmentRepository : IAppointmentRepository
     {
         _context = context;
     }
-
-    public async Task<List<Appointment>> GetByUserIdAsync(string userId)
+    
+    public async Task<List<Appointment>> GetByUserIdAsync(string userId, DateOnly fromDate, DateOnly toDate)
     {
         var userGuid = Guid.Parse(userId);
         return await _context.Appointments
-            .Where(a => a.OrganizerId == userGuid)
+            .Where(a => a.OrganizerId == userGuid &&
+                        a.AppointmentDate >= fromDate &&
+                        a.AppointmentDate <= toDate)
             .ToListAsync();
     }
 

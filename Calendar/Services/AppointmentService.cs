@@ -25,8 +25,8 @@ public class AppointmentService
 
     public async Task<List<Appointment>> GetAsync(GetAppointmentRequestDto getAppointmentRequestDto, string userId)
     {
-        List<Appointment> appointments1 = await _appointmentRepository.GetByUserIdAsync(userId);
-        List<Appointment> appointments2 = await _participantRepository.GetAppointmentsByIdAsync(userId);
+        List<Appointment> appointments1 = await _appointmentRepository.GetByUserIdAsync(userId, getAppointmentRequestDto.FromDate, getAppointmentRequestDto.ToDate);
+        List<Appointment> appointments2 = await _participantRepository.GetAppointmentsByIdAsync(userId, getAppointmentRequestDto.FromDate, getAppointmentRequestDto.ToDate);
 
         // Merge the lists
         List<Appointment> allAppointments = appointments1.Concat(appointments2).ToList();
@@ -39,8 +39,8 @@ public class AppointmentService
 
     public async Task<Appointment> AddAsync(AddAppointmentRequestDto addAppointmentRequestDto, string userId)
     {
-        var appointmentsList1 = await _appointmentRepository.GetByUserIdAsync(userId);
-        var appointmentsList2 = await _participantRepository.GetAppointmentsByIdAsync(userId);
+        var appointmentsList1 = await _appointmentRepository.GetByUserIdAsync(userId, addAppointmentRequestDto.AppointmentDate, addAppointmentRequestDto.AppointmentDate);
+        var appointmentsList2 = await _participantRepository.GetAppointmentsByIdAsync(userId, addAppointmentRequestDto.AppointmentDate, addAppointmentRequestDto.AppointmentDate);
 
         foreach (var app in appointmentsList1)
         {

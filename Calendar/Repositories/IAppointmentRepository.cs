@@ -5,7 +5,7 @@ namespace Calendar.Repositories;
 
 public interface IAppointmentRepository
 {
-    Task<List<Appointment>> GetByUserIdAsync(string userId);
+    Task<List<Appointment>> GetByUserIdAsync(string userId, DateOnly fromDate, DateOnly toDate);
     Task<Appointment> GetByIdAsync(Guid appointmentId);
     Task AddAsync(Appointment appointment);
     Task UpdateAsync(Appointment appointment);

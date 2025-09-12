@@ -52,7 +52,7 @@ public class ParticipantsController : ControllerBase
         try
         {
             var result = await _participantService.checkAvailability(checkAvailabilityRequestDto);
-            if(!result) return BadRequest(new { message = "User is not available" });
+            if(!result) return BadRequest(new { message = "User is not available in the selected time" });
             return Ok();
         }
         catch (Exception ex)

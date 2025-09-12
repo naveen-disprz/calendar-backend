@@ -2,5 +2,6 @@
 
 public class GetAppointmentRequestDto
 {
-    public DateOnly AppointmentDate { get; set; }
+    public DateOnly FromDate { get; set; }
+    public DateOnly ToDate { get; set; }
 }

@@ -27,10 +27,20 @@ public class ParticipantRepository : IParticipantRepository
         return await _context.Users.ToListAsync();
     }
 
-    public async Task<List<Appointment>> GetAppointmentsByIdAsync(string userId)
+    // public async Task<List<Appointment>> GetAppointmentsByIdAsync(string userId, DateOnly fromDate, DateOnly toDate)
+    // {
+    //     return await _context.Participants.Where(p => p.UserId.ToString() == userId)
+    //         .Include(p => p.Appointment)
+    //         .Select(p => p.Appointment)
+    //         .ToListAsync();
+    // }
+    
+    public async Task<List<Appointment>> GetAppointmentsByIdAsync(string userId, DateOnly fromDate, DateOnly toDate)
     {
-        return await _context.Participants.Where(p => p.UserId.ToString() == userId)
+        return await _context.Participants
+            .Where(p => p.UserId.ToString() == userId)
             .Include(p => p.Appointment)
+            .Where(p => p.Appointment.AppointmentDate >= fromDate && p.Appointment.AppointmentDate <= toDate)
             .Select(p => p.Appointment)
             .ToListAsync();
     }

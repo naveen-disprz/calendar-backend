@@ -5,7 +5,7 @@ namespace Calendar.Mappers;
 
 public class AppointmentMapper
 {
-    public static Appointment ToEntity(AddAppointmentRequestDto appointmentDto, Guid organizerId)
+    public static Appointment ToEntity(AddAppointmentRequestDto appointmentDto, Guid organizerId, int? recurrenceRuleId = null)
     {
         return new Appointment
         {
@@ -17,6 +17,7 @@ public class AppointmentMapper
             EndTime = appointmentDto.EndTime,
             OrganizerId = organizerId,
             AppointmentTypeId = appointmentDto.AppointmentTypeId,
+            RecurrenceRuleId = recurrenceRuleId,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
         };

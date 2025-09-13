@@ -5,4 +5,6 @@ namespace Calendar.Repositories;
 public interface IRecurrenceRuleRepository
 {
     Task AddAsync(RecurrenceRule recurrenceRule);
+    
+    Task<RecurrenceRule> GetOrCreateRecurrenceRuleAsync(RecurrenceRule recurrenceRule);
 }

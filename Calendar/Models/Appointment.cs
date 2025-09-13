@@ -48,4 +48,6 @@ public class Appointment
     public int? AppointmentTypeId { get; set; }
     
     public Type? AppointmentType { get; set; }
+    
+    public ICollection<Participant> Participants { get; set; } = new List<Participant>();
 } 

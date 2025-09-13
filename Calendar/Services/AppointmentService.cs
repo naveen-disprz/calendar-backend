@@ -11,22 +11,27 @@ public class AppointmentService
     private readonly IAppointmentRepository _appointmentRepository;
     private readonly IParticipantRepository _participantRepository;
     private readonly ITypeRepository _typeRepository;
+    private readonly IRecurrenceRuleRepository _recurrenceRuleRepository;
 
     public AppointmentService(
         IAppointmentRepository appointmentRepository,
         IParticipantRepository participantRepository,
-        ITypeRepository typeRepository
+        ITypeRepository typeRepository,
+        IRecurrenceRuleRepository recurrenceRuleRepository
     )
     {
         _appointmentRepository = appointmentRepository;
         _participantRepository = participantRepository;
         _typeRepository = typeRepository;
+        _recurrenceRuleRepository = recurrenceRuleRepository;
     }
 
     public async Task<List<Appointment>> GetAsync(GetAppointmentRequestDto getAppointmentRequestDto, string userId)
     {
-        List<Appointment> appointments1 = await _appointmentRepository.GetByUserIdAsync(userId, getAppointmentRequestDto.FromDate, getAppointmentRequestDto.ToDate);
-        List<Appointment> appointments2 = await _participantRepository.GetAppointmentsByIdAsync(userId, getAppointmentRequestDto.FromDate, getAppointmentRequestDto.ToDate);
+        List<Appointment> appointments1 = await _appointmentRepository.GetByUserIdAsync(userId,
+            getAppointmentRequestDto.FromDate, getAppointmentRequestDto.ToDate);
+        List<Appointment> appointments2 = await _participantRepository.GetAppointmentsByIdAsync(userId,
+            getAppointmentRequestDto.FromDate, getAppointmentRequestDto.ToDate);
 
         // Merge the lists
         List<Appointment> allAppointments = appointments1.Concat(appointments2).ToList();
@@ -39,8 +44,10 @@ public class AppointmentService
 
     public async Task<Appointment> AddAsync(AddAppointmentRequestDto addAppointmentRequestDto, string userId)
     {
-        var appointmentsList1 = await _appointmentRepository.GetByUserIdAsync(userId, addAppointmentRequestDto.AppointmentDate, addAppointmentRequestDto.AppointmentDate);
-        var appointmentsList2 = await _participantRepository.GetAppointmentsByIdAsync(userId, addAppointmentRequestDto.AppointmentDate, addAppointmentRequestDto.AppointmentDate);
+        var appointmentsList1 = await _appointmentRepository.GetByUserIdAsync(userId,
+            addAppointmentRequestDto.AppointmentDate, addAppointmentRequestDto.AppointmentDate);
+        var appointmentsList2 = await _participantRepository.GetAppointmentsByIdAsync(userId,
+            addAppointmentRequestDto.AppointmentDate, addAppointmentRequestDto.AppointmentDate);
 
         foreach (var app in appointmentsList1)
         {
@@ -60,7 +67,22 @@ public class AppointmentService
             }
         }
 
-        var appointment = AppointmentMapper.ToEntity(addAppointmentRequestDto, Guid.Parse(userId));
+        bool isRecurring = !string.IsNullOrEmpty(addAppointmentRequestDto.Frequency) &&
+                           addAppointmentRequestDto.Until.HasValue;
+        RecurrenceRule? rule = null;
+        if (isRecurring)
+        {
+            // Handle recurrence rule
+            var recurrenceRule = new RecurrenceRule
+            {
+                Frequency = addAppointmentRequestDto.Frequency!,
+                Until = (DateOnly)addAppointmentRequestDto.Until!
+            };
+
+            rule = await _recurrenceRuleRepository.GetOrCreateRecurrenceRuleAsync(recurrenceRule);
+        }
+
+        var appointment = AppointmentMapper.ToEntity(addAppointmentRequestDto, Guid.Parse(userId), rule?.RecurrenceRuleId);
 
         await _appointmentRepository.AddAsync(appointment);
 

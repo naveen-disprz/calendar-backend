@@ -11,12 +11,8 @@ public class RecurrenceRule
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int RecurrenceRuleId { get; set; }
 
-    [Required, MaxLength(50)] 
-    public string Frequency { get; set; } = string.Empty;
+    [Required, MaxLength(50)]
+    public string Frequency { get; set; } = string.Empty; // e.g., "Daily", "Weekly", "Monthly"
 
-    public int Interval { get; set; } = 1;
-
-    public DateTime? Until { get; set; }
-
-    public int? Count { get; set; }
+    public DateOnly Until { get; set; } // The date until the recurrence is valid
 }

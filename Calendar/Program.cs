@@ -80,9 +80,8 @@ builder.Services.AddAuthorization();
 
 // MySQL DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        new MySqlServerVersion(new Version(8, 0, 36))
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection")
     ));
 
 // Dependency Injection
@@ -101,23 +100,23 @@ builder.Services.AddScoped<ParticipantService, ParticipantService>();
 var app = builder.Build();
 
 // SeedData(app);
-//
-// void SeedData(WebApplication app)
-// {
-//     using var scope = app.Services.CreateScope();
-//     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-//
-//     if (!context.Types.Any())
-//     {
-//         context.Types.AddRange(
-//             new Calendar.Models.Type { TypeName = "Meeting", ColorCode = "#FF5733" },
-//             new Calendar.Models.Type { TypeName = "Workshop", ColorCode = "#33FF57" },
-//             new Calendar.Models.Type { TypeName = "Conference", ColorCode = "#3357FF" }
-//         );
-//
-//         context.SaveChanges();
-//     }
-// }
+
+void SeedData(WebApplication app)
+{
+    using var scope = app.Services.CreateScope();
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+    if (!context.Types.Any())
+    {
+        context.Types.AddRange(
+            new Calendar.Models.Type { TypeName = "Meeting", ColorCode = "#FF5733" },
+            new Calendar.Models.Type { TypeName = "Workshop", ColorCode = "#33FF57" },
+            new Calendar.Models.Type { TypeName = "Conference", ColorCode = "#3357FF" }
+        );
+
+        context.SaveChanges();
+    }
+}
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())

@@ -20,5 +20,17 @@ public class AppDbContext : DbContext
     {
         modelBuilder.Entity<Participant>()
             .HasKey(ap => new { ap.AppointmentId, ap.UserId });
+        
+        modelBuilder.Entity<Participant>()
+            .HasOne(p => p.Appointment)
+            .WithMany(a => a.Participants)
+            .HasForeignKey(p => p.AppointmentId)
+            .OnDelete(DeleteBehavior.Restrict); // Prevent cascading delete
+
+        modelBuilder.Entity<Participant>()
+            .HasOne(p => p.User)
+            .WithMany(u => u.Participations)
+            .HasForeignKey(p => p.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

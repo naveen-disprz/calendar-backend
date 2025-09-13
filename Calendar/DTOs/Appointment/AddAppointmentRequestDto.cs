@@ -9,4 +9,8 @@ public class AddAppointmentRequestDto
     public TimeOnly EndTime { get; set; }
     public int AppointmentTypeId { get; set; }
     public List<string> Participants { get; set; }
+    
+    public string? Frequency { get; set; } // Nullable, e.g., "Daily", "Weekly", "Monthly"
+    
+    public DateOnly? Until { get; set; } // Nullable, the date until the recurrence is valid
 }

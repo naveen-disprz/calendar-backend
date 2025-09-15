@@ -1,53 +1,83 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Calendar.Models;
 
 public class Appointment
 {
-    [Key] 
-    public Guid AppointmentId { get; set; } =  Guid.NewGuid();
+    [Key] public Guid Id { get; set; } = Guid.NewGuid();
 
-    [Required, MaxLength(200)] 
-    public string Title { get; set; } = string.Empty;
+    [Required] public Guid OrganizerId { get; set; }
 
-    public string? Description { get; set; }
+    [Required] [MaxLength(200)] public string Title { get; set; } = string.Empty;
 
-    // 🔑 Date of the appointment
-    [Required]
-    public DateOnly AppointmentDate { get; set; }
+    [MaxLength(1000)] public string? Description { get; set; }
 
-    // 🔑 Start and end times (time-only)
-    [Required]
-    public TimeOnly StartTime { get; set; }
+    [Required] public DateTime StartDateTime { get; set; }
 
-    [Required]
-    public TimeOnly EndTime { get; set; }
-    
-    // Timestamps
-    [Required]
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    
-    [Required]
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    [Required] public DateTime EndDateTime { get; set; }
 
-    // Foreign Keys
-    [ForeignKey(nameof(Organizer))] 
-    public Guid OrganizerId { get; set; }
-    
-    public User Organizer { get; set; }
+    [MaxLength(500)] public string? Location { get; set; }
 
-    [ForeignKey(nameof(RecurrenceRule))] 
-    public int? RecurrenceRuleId { get; set; }
-    
-    public RecurrenceRule? RecurrenceRule { get; set; }
+    public Guid? AppointmentTypeId { get; set; }
 
-    [ForeignKey(nameof(AppointmentType))] 
-    public int? AppointmentTypeId { get; set; }
-    
-    public Type? AppointmentType { get; set; }
-    
-    public ICollection<Participant> Participants { get; set; } = new List<Participant>();
-} 
+    public Guid? RecurrenceRuleId { get; set; }
+
+    [Required] public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    [Required] public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+    [Required] public bool IsDeleted { get; set; } = false;
+
+    // Navigation Properties
+    [ForeignKey("OrganizerId")] public virtual User Organizer { get; set; } = null!;
+
+    [ForeignKey("AppointmentTypeId")] public virtual AppointmentType? AppointmentType { get; set; }
+
+    [ForeignKey("RecurrenceRuleId")] public virtual RecurrenceRule? RecurrenceRule { get; set; }
+
+    public virtual ICollection<AppointmentAttendee> Attendees { get; set; } = new List<AppointmentAttendee>();
+
+    // Computed Properties
+    [NotMapped] public TimeSpan Duration => EndDateTime - StartDateTime;
+
+    [NotMapped] public bool IsRecurring => RecurrenceRuleId != null;
+
+    [NotMapped]
+    public bool IsAllDay => StartDateTime.TimeOfDay == TimeSpan.Zero &&
+                            EndDateTime.TimeOfDay == TimeSpan.Zero &&
+                            Duration.Days >= 1;
+
+    [NotMapped]
+    public string FormattedTimeRange =>
+        $"{StartDateTime:HH:mm} - {EndDateTime:HH:mm}";
+
+    [NotMapped]
+    public string FormattedDateTimeRange =>
+        StartDateTime.Date == EndDateTime.Date
+            ? $"{StartDateTime:MMM dd, yyyy} {FormattedTimeRange}"
+            : $"{StartDateTime:MMM dd, yyyy HH:mm} - {EndDateTime:MMM dd, yyyy HH:mm}";
+
+    // Helper Methods
+    public bool HasConflictWith(Appointment other)
+    {
+        return StartDateTime < other.EndDateTime && EndDateTime > other.StartDateTime;
+    }
+
+    public bool IsOnDate(DateTime date)
+    {
+        var dateOnly = date.Date;
+        return StartDateTime.Date <= dateOnly && EndDateTime.Date >= dateOnly;
+    }
+
+    public List<User> GetAllAttendees()
+    {
+        var attendeeUsers = Attendees.Select(a => a.User).ToList();
+        if (!attendeeUsers.Any(u => u.Id == OrganizerId))
+        {
+            attendeeUsers.Add(Organizer);
+        }
+
+        return attendeeUsers;
+    }
+}

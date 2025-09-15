@@ -1,49 +1,104 @@
-﻿using Calendar.DTOs.User;
-using Calendar.Interfaces;
-using Calendar.Services;
+﻿using Calendar.Business;
+using Calendar.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Calendar.Controllers;
-
-[ApiController]
-[Route("api/[controller]")]
-public class AuthController : ControllerBase
+namespace Calendar.Controllers
 {
-    private readonly UserService _userService;
-
-    public AuthController(UserService userService)
+    [ApiController]
+    [Route("api/auth")]
+    public class AuthController : ControllerBase
     {
-        _userService = userService;
-    }
+        private readonly IAuthBL _authBL;
+        private readonly ILogger<AuthController> _logger;
 
-    [HttpPost("signup")]
-    public async Task<IActionResult> Signup(UserSignupRequestDto signupRequestDto)
-    {
-        try
+        public AuthController(
+            IAuthBL authBL,
+            ILogger<AuthController> logger)
         {
-            var result = await _userService.RegisterAsync(signupRequestDto);
-            return Ok(result);
+            _authBL = authBL;
+            _logger = logger;
         }
-        catch (Exception ex)
+
+        /// <summary>
+        /// Register a new user
+        /// </summary>
+        /// <param name="request">Signup request</param>
+        /// <returns>Authentication response with token</returns>
+        [HttpPost("signup")]
+        public async Task<ActionResult<AuthResponseDto>> Signup([FromBody] SignupRequestDto request)
         {
-            return BadRequest(new
+            try
             {
-                message = ex.Message
-            });
-        }
-    }
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .ToList();
 
-    [HttpPost("login")]
-    public async Task<IActionResult> Login(UserLoginRequestDto loginRequestDto)
-    {
-        try
-        {
-            var userResponse = await _userService.LoginAsync(loginRequestDto);
-            return Ok(userResponse);
+                    return BadRequest(new ErrorResponseDto("Validation failed", errors));
+                }
+
+                var result = await _authBL.SignupAsync(request);
+
+                _logger.LogInformation("User signup successful: {Email}", request.Email);
+
+                return Ok(result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogWarning("Signup failed - user exists: {Email}, Error: {Message}", 
+                    request.Email, ex.Message);
+
+                return Conflict(new ErrorResponseDto(ex.Message));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Signup failed: {Email}", request.Email);
+
+                return StatusCode(500, new ErrorResponseDto("An error occurred during registration"));
+            }
         }
-        catch (Exception ex)
+
+        /// <summary>
+        /// Authenticate user and return token
+        /// </summary>
+        /// <param name="request">Login request</param>
+        /// <returns>Authentication response with token</returns>
+        [HttpPost("login")]
+        public async Task<ActionResult<AuthResponseDto>> Login([FromBody] LoginRequestDto request)
         {
-            return BadRequest(new { message = ex.Message });
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .ToList();
+
+                    return BadRequest(new ErrorResponseDto("Validation failed", errors));
+                }
+
+                var result = await _authBL.LoginAsync(request);
+
+                _logger.LogInformation("User login successful: {Email}", request.Email);
+
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning("Login failed - invalid credentials: {Email}, Error: {Message}", 
+                    request.Email, ex.Message);
+
+                return Unauthorized(new ErrorResponseDto("Invalid email or password"));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Login failed: {Email}", request.Email);
+
+                return StatusCode(500, new ErrorResponseDto("An error occurred during login"));
+            }
         }
     }
 }

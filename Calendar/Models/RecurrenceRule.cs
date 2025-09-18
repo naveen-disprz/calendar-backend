@@ -81,7 +81,7 @@ public class RecurrenceRule
         var days = new List<int>();
         if (DaysOfMonthMask == null) return days;
 
-        for (int day = 1; day <= 31; day++)
+        for (int day = 0; day <= 30; day++)
         {
             if (HasDayOfMonth(day))
             {

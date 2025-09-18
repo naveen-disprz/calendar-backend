@@ -1,6 +1,7 @@
 ﻿using Calendar.DataAccess;
 using Calendar.DTOs;
 using Calendar.Models;
+using Calendar.Utils;
 
 namespace Calendar.Business;
 
@@ -67,14 +68,20 @@ public class AppointmentBL : IAppointmentBL
 
 
             // Check for conflicts
-            var conflictingAppointments = await _appointmentDAL.GetConflictingAppointmentsAsync(
+            var conflictingAppointments = await GetConflictingAppointmentsWithRecurrenceAsync(
                 request.StartDateTime,
                 request.EndDateTime,
                 userId);
 
             if (conflictingAppointments.Any())
             {
-                var conflictTitles = string.Join(", ", conflictingAppointments.Select(a => a.Title));
+                var conflictDetails = conflictingAppointments.Select(a => 
+                    a.IsRecurring 
+                        ? $"{a.Title} (recurring)" 
+                        : a.Title
+                ).Distinct();
+            
+                var conflictTitles = string.Join(", ", conflictDetails);
                 throw new InvalidOperationException(
                     $"Appointment conflicts with existing appointments: {conflictTitles}");
             }
@@ -138,7 +145,7 @@ public class AppointmentBL : IAppointmentBL
             _logger.LogInformation("Appointment created successfully: {AppointmentId} by user {UserId}",
                 createdAppointment.Id, userId);
 
-            return MapToAppointmentResponseDto(createdAppointment);
+            return MapToAppointmentResponseDto(createdAppointment, false, null);
         }
         catch (Exception ex)
         {
@@ -189,7 +196,7 @@ public class AppointmentBL : IAppointmentBL
             }
 
             // Check for conflicts (excluding current appointment)
-            var conflictingAppointments = await _appointmentDAL.GetConflictingAppointmentsAsync(
+            var conflictingAppointments = await GetConflictingAppointmentsWithRecurrenceAsync(
                 request.StartDateTime,
                 request.EndDateTime,
                 userId,
@@ -197,7 +204,13 @@ public class AppointmentBL : IAppointmentBL
 
             if (conflictingAppointments.Any())
             {
-                var conflictTitles = string.Join(", ", conflictingAppointments.Select(a => a.Title));
+                var conflictDetails = conflictingAppointments.Select(a => 
+                    a.IsRecurring 
+                        ? $"{a.Title} (recurring)" 
+                        : a.Title
+                ).Distinct();
+            
+                var conflictTitles = string.Join(", ", conflictDetails);
                 throw new InvalidOperationException(
                     $"Appointment conflicts with existing appointments: {conflictTitles}");
             }
@@ -232,16 +245,18 @@ public class AppointmentBL : IAppointmentBL
                     recurrenceRule.SetDaysOfMonth(request.Recurrence.DaysOfMonth);
                 }
             }
-            
+
+
             if (existingAppointment.RecurrenceRuleId != null && request.Recurrence != null)
             {
                 await _recurrenceRuleDAL.UpdateAsync((Guid)(existingAppointment.RecurrenceRuleId), recurrenceRule);
-            } else if (existingAppointment.RecurrenceRuleId != null && request.Recurrence == null)
+            }
+            else if (existingAppointment.RecurrenceRuleId != null && request.Recurrence == null)
             {
                 await _recurrenceRuleDAL.DeleteAsync((Guid)(existingAppointment.RecurrenceRuleId));
                 existingAppointment.RecurrenceRuleId = null;
             }
-            else
+            else if (existingAppointment.RecurrenceRuleId == null && request.Recurrence != null)
             {
                 var newRule = await _recurrenceRuleDAL.CreateAsync(recurrenceRule!);
                 existingAppointment.RecurrenceRule = newRule;
@@ -265,7 +280,7 @@ public class AppointmentBL : IAppointmentBL
 
             // Get the complete updated appointment
             var completeAppointment = await _appointmentDAL.GetByIdAsync(appointmentId);
-            return MapToAppointmentResponseDto(completeAppointment!);
+            return MapToAppointmentResponseDto(completeAppointment!, false, null);
         }
         catch (Exception ex)
         {
@@ -304,17 +319,103 @@ public class AppointmentBL : IAppointmentBL
                 appointmentTypeId,
                 includeRecurring);
 
-            _logger.LogInformation("Retrieved {Count} appointments for user {UserId} from {FromDate} to {ToDate}",
-                appointments.Count, userId, fromDate, toDate);
+            var appointmentDtos = new List<AppointmentResponseDto>();
 
-            // Map to response DTOs
-            return appointments.Select(MapToAppointmentResponseDto).ToList();
+            foreach (var appointment in appointments)
+            {
+                if (appointment.IsRecurring && includeRecurring == true)
+                {
+
+                    // Add the original appointment if it falls within the date range
+                    if (appointment.StartDateTime >= fromDate && appointment.StartDateTime <= toDate)
+                    {
+                        // This is the original appointment
+                        appointmentDtos.Add(MapToAppointmentResponseDto(appointment, false, null));
+                    }
+
+                    // Expand recurring appointment into instances
+                    var instances = RecurrenceUtils.ExpandRecurringAppointment(appointment, fromDate, toDate);
+
+                    // Map instances with parent reference
+                    foreach (var instance in instances)
+                    {
+                        // Skip if this instance is on the same date/time as the original
+                        if (instance.StartDateTime == appointment.StartDateTime)
+                            continue;
+
+                        appointmentDtos.Add(MapToAppointmentResponseDto(instance, true, appointment));
+                    }
+                }
+                else if (!appointment.IsRecurring)
+                {
+                    // Add non-recurring appointments as-is
+                    appointmentDtos.Add(MapToAppointmentResponseDto(appointment, false, null));
+                }
+            }
+
+            // Sort by start date/time
+            appointmentDtos = appointmentDtos.OrderBy(a => a.StartDateTime).ToList();
+
+            _logger.LogInformation("Retrieved {Count} appointments for user {UserId} from {FromDate} to {ToDate}",
+                appointmentDtos.Count, userId, fromDate, toDate);
+
+            return appointmentDtos;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving appointments for user {UserId}", userId);
             throw;
         }
+    }
+
+    public async Task<List<Appointment>> GetConflictingAppointmentsWithRecurrenceAsync(
+        DateTime startDateTime, 
+        DateTime endDateTime, 
+        Guid userId, 
+        Guid? excludeAppointmentId = null)
+    {
+        // Get all potential conflicting appointments (including recurring ones)
+        var potentialConflicts = await _appointmentDAL.GetPotentialConflictingAppointmentsAsync(
+            startDateTime, 
+            endDateTime, 
+            userId, 
+            excludeAppointmentId);
+
+        var conflictingAppointments = new List<Appointment>();
+
+        foreach (var appointment in potentialConflicts)
+        {
+            if (appointment.IsRecurring)
+            {
+                // Expand recurring appointment to check for conflicts
+                var instances = RecurrenceUtils.ExpandRecurringAppointment(
+                    appointment, 
+                    startDateTime.AddDays(-1), // Slightly expand range to catch edge cases
+                    endDateTime.AddDays(1));
+            
+                // Check if any instance conflicts
+                foreach (var instance in instances)
+                {
+                    if (instance.StartDateTime < endDateTime && instance.EndDateTime > startDateTime)
+                    {
+                        // This instance conflicts - add the original appointment (not the instance)
+                        // to maintain consistency with how we handle conflicts
+                        conflictingAppointments.Add(appointment);
+                        break; // One conflict is enough, no need to check more instances
+                    }
+                }
+            }
+            else
+            {
+                // Non-recurring appointment - check direct overlap
+                if (appointment.StartDateTime < endDateTime && appointment.EndDateTime > startDateTime)
+                {
+                    conflictingAppointments.Add(appointment);
+                }
+            }
+        }
+
+        return conflictingAppointments;
     }
 
     public async Task<bool> DeleteAppointmentAsync(Guid appointmentId, Guid userId)
@@ -361,7 +462,7 @@ public class AppointmentBL : IAppointmentBL
         return await _appointmentTypeDAL.GetAllAsync();
     }
 
-    private static AppointmentResponseDto MapToAppointmentResponseDto(Appointment appointment)
+    private static AppointmentResponseDto MapToAppointmentResponseDto(Appointment appointment, bool isInstance = false, Appointment? originalAppointment = null)
     {
         return new AppointmentResponseDto
         {
@@ -374,6 +475,11 @@ public class AppointmentBL : IAppointmentBL
             OrganizerId = appointment.OrganizerId,
             OrganizerName = appointment.Organizer?.FullName ?? string.Empty,
             IsRecurring = appointment.IsRecurring,
+            IsRecurringInstance = isInstance,  // Now properly set
+            
+            ParentAppointmentId = originalAppointment?.Id,     // Now properly set
+            ParentAppointmentEndDateTime = originalAppointment?.EndDateTime,
+            ParentAppointmentStartDateTime = originalAppointment?.StartDateTime,
             FormattedTimeRange = appointment.FormattedTimeRange,
             FormattedDateTimeRange = appointment.FormattedDateTimeRange,
             CreatedAt = appointment.CreatedAt,
@@ -398,4 +504,5 @@ public class AppointmentBL : IAppointmentBL
                 : null
         };
     }
+
 }

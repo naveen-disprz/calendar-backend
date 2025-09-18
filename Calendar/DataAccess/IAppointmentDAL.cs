@@ -15,4 +15,10 @@ public interface IAppointmentDAL
 
     Task<List<Appointment>> GetAppointmentsByDateRangeAsync(Guid userId, DateTime fromDate, DateTime toDate,
         Guid? appointmentTypeId = null, bool? includeRecurring = true);
+    
+    Task<List<Appointment>> GetPotentialConflictingAppointmentsAsync(
+        DateTime startDateTime, 
+        DateTime endDateTime, 
+        Guid userId, 
+        Guid? excludeAppointmentId = null);
 }

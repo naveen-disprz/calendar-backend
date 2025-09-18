@@ -8,15 +8,18 @@ public class AppointmentAttendeeBL : IAppointmentAttendeeBL
     private readonly ILogger<AppointmentAttendeeBL> _logger;
     private readonly IUserDAL _userDAL;
     private readonly IAppointmentDAL _appointmentDAL;
+    private readonly IAppointmentBL _appointmentBL;
     private readonly IAppointmentAttendeeDAL _appointmentAttendeeDAL;
 
     public AppointmentAttendeeBL(IUserDAL userDAL, IAppointmentDAL appointmentDAL,
+        IAppointmentBL appointmentBL,
         IAppointmentAttendeeDAL appointmentAttendeeDAL,
         ILogger<AppointmentAttendeeBL> logger)
     {
         _logger = logger;
         _userDAL = userDAL;
         _appointmentDAL = appointmentDAL;
+        _appointmentBL = appointmentBL;
         _appointmentAttendeeDAL = appointmentAttendeeDAL;
     }
 
@@ -55,11 +58,18 @@ public class AppointmentAttendeeBL : IAppointmentAttendeeBL
             }
 
             // Get conflicting appointments for the attendee
-            var conflictingAppointments = await _appointmentDAL.GetConflictingAppointmentsAsync(
+            // var conflictingAppointments = await _appointmentDAL.GetConflictingAppointmentsAsync(
+            //     request.StartDateTime,
+            //     request.EndDateTime,
+            //     request.AttendeeId,
+            //     request.ExcludeAppointmentId);
+            
+            var conflictingAppointments = await _appointmentBL.GetConflictingAppointmentsWithRecurrenceAsync(
                 request.StartDateTime,
                 request.EndDateTime,
                 request.AttendeeId,
                 request.ExcludeAppointmentId);
+
 
             var isAvailable = !conflictingAppointments.Any();
             var message = isAvailable

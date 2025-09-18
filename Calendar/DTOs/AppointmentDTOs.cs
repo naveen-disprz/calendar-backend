@@ -132,7 +132,6 @@ public class AppointmentResponseDto
     public DateTime StartDateTime { get; set; }
     public DateTime EndDateTime { get; set; }
     public string? Location { get; set; }
-    public string Color { get; set; } = string.Empty;
     public Guid OrganizerId { get; set; }
     public string OrganizerName { get; set; } = string.Empty;
     public bool IsRecurring { get; set; }
@@ -146,6 +145,12 @@ public class AppointmentResponseDto
 
     // Recurrence
     public RecurrenceResponseDto? Recurrence { get; set; }
+    
+    // Add these properties for recurring instance tracking
+    public bool IsRecurringInstance { get; set; }
+    public Guid? ParentAppointmentId { get; set; }
+    public DateTime? ParentAppointmentStartDateTime { get; set; }
+    public DateTime? ParentAppointmentEndDateTime { get; set; }
 }
 
 // Appointment Type Response

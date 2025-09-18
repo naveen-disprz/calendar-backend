@@ -16,5 +16,11 @@ namespace Calendar.Business
         Task<bool> DeleteAppointmentAsync(Guid appointmentId, Guid userId);
         
         Task<List<AppointmentType>> GetAppointmentTypesAsync();
+
+        Task<List<Appointment>> GetConflictingAppointmentsWithRecurrenceAsync(
+            DateTime startDateTime,
+            DateTime endDateTime,
+            Guid userId,
+            Guid? excludeAppointmentId = null);
     }
 }

@@ -138,9 +138,14 @@ namespace Calendar.Migrations
                 columns: new[] { "Id", "Color", "CreatedAt", "Name", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { new Guid("11111111-1111-1111-1111-111111111111"), "#2196f3", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "Meeting", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc) },
-                    { new Guid("22222222-2222-2222-2222-222222222222"), "#4caf50", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "Personal", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc) },
-                    { new Guid("33333333-3333-3333-3333-333333333333"), "#ff9800", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "Work", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc) }
+                    { new Guid("11111111-1111-1111-1111-111111111111"), "#90caf9", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "Meeting", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc) },
+                    { new Guid("22222222-2222-2222-2222-222222222222"), "#a5d6a7", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "Personal", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc) },
+                    { new Guid("33333333-3333-3333-3333-333333333333"), "#ffcc80", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "Work", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc) },
+                    { new Guid("44444444-4444-4444-4444-444444444444"), "#f48fb1", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "Health", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc) },
+                    { new Guid("55555555-5555-5555-5555-555555555555"), "#80deea", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "Travel", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc) },
+                    { new Guid("66666666-6666-6666-6666-666666666666"), "#b39ddb", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "Study", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc) },
+                    { new Guid("77777777-7777-7777-7777-777777777777"), "#ffe082", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "Family", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc) },
+                    { new Guid("88888888-8888-8888-8888-888888888888"), "#bcaaa4", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "Errands", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc) }
                 });
 
             migrationBuilder.CreateIndex(

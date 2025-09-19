@@ -7,8 +7,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using DotNetEnv;
+
+// Load .env file at the very beginning
+Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add environment variables to configuration (this will include .env variables)
+builder.Configuration.AddEnvironmentVariables();
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -49,10 +56,14 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// JWT Configuration
-var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey not configured");
-var key = Encoding.ASCII.GetBytes(secretKey);
+// JWT Configuration - Now it will use JWT_SECRET_KEY from .env if available
+var jwtSecretKey = builder.Configuration["JWT_SECRET_KEY"] ?? builder.Configuration["JwtSettings:SecretKey"];
+if (string.IsNullOrEmpty(jwtSecretKey))
+{
+    throw new InvalidOperationException("JWT SecretKey not configured");
+}
+
+var key = Encoding.ASCII.GetBytes(jwtSecretKey);
 
 builder.Services.AddAuthentication(options =>
 {
@@ -68,13 +79,16 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(key),
         ValidateIssuer = true,
-        ValidIssuer = jwtSettings["Issuer"],
+        ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
         ValidateAudience = true,
-        ValidAudience = jwtSettings["Audience"],
+        ValidAudience = builder.Configuration["JwtSettings:Audience"],
         ValidateLifetime = true,
         ClockSkew = TimeSpan.Zero
     };
 });
+
+// Register PasswordHasher
+builder.Services.AddSingleton<PasswordHasher>();
 
 // Dependency Injection
 builder.Services.AddScoped<IAuthBL, AuthBL>();

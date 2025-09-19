@@ -139,7 +139,7 @@ public class AppDbContext : DbContext
                 {
                     Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
                     Name = "Meeting",
-                    Color = "#2196f3",
+                    Color = "#90caf9", // Soft Blue
                     CreatedAt = seedDate,
                     UpdatedAt = seedDate
                 },
@@ -147,7 +147,7 @@ public class AppDbContext : DbContext
                 {
                     Id = Guid.Parse("22222222-2222-2222-2222-222222222222"),
                     Name = "Personal",
-                    Color = "#4caf50",
+                    Color = "#a5d6a7", // Soft Green
                     CreatedAt = seedDate,
                     UpdatedAt = seedDate
                 },
@@ -155,11 +155,52 @@ public class AppDbContext : DbContext
                 {
                     Id = Guid.Parse("33333333-3333-3333-3333-333333333333"),
                     Name = "Work",
-                    Color = "#ff9800",
+                    Color = "#ffcc80", // Soft Orange
+                    CreatedAt = seedDate,
+                    UpdatedAt = seedDate
+                },
+                new AppointmentType
+                {
+                    Id = Guid.Parse("44444444-4444-4444-4444-444444444444"),
+                    Name = "Health",
+                    Color = "#f48fb1", // Soft Pink
+                    CreatedAt = seedDate,
+                    UpdatedAt = seedDate
+                },
+                new AppointmentType
+                {
+                    Id = Guid.Parse("55555555-5555-5555-5555-555555555555"),
+                    Name = "Travel",
+                    Color = "#80deea", // Soft Cyan
+                    CreatedAt = seedDate,
+                    UpdatedAt = seedDate
+                },
+                new AppointmentType
+                {
+                    Id = Guid.Parse("66666666-6666-6666-6666-666666666666"),
+                    Name = "Study",
+                    Color = "#b39ddb", // Soft Purple
+                    CreatedAt = seedDate,
+                    UpdatedAt = seedDate
+                },
+                new AppointmentType
+                {
+                    Id = Guid.Parse("77777777-7777-7777-7777-777777777777"),
+                    Name = "Family",
+                    Color = "#ffe082", // Soft Yellow
+                    CreatedAt = seedDate,
+                    UpdatedAt = seedDate
+                },
+                new AppointmentType
+                {
+                    Id = Guid.Parse("88888888-8888-8888-8888-888888888888"),
+                    Name = "Errands",
+                    Color = "#bcaaa4", // Soft Brown/Neutral
                     CreatedAt = seedDate,
                     UpdatedAt = seedDate
                 }
             };
+
 
             modelBuilder.Entity<AppointmentType>().HasData(appointmentTypes);
         }

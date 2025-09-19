@@ -9,15 +9,18 @@ public class AuthBL : IAuthBL
 {
     private readonly IUserDAL _userDAL;
     private readonly JwtHelper _jwtHelper;
+    private readonly PasswordHasher _passwordHasher;
     private readonly ILogger<AuthBL> _logger;
 
     public AuthBL(
         IUserDAL userDAL,
         JwtHelper jwtHelper,
+        PasswordHasher passwordHasher,
         ILogger<AuthBL> logger)
     {
         _userDAL = userDAL;
         _jwtHelper = jwtHelper;
+        _passwordHasher = passwordHasher;
         _logger = logger;
     }
 
@@ -31,14 +34,14 @@ public class AuthBL : IAuthBL
                 throw new InvalidOperationException("User with this email already exists.");
             }
 
-            // Create user
+            // Create user with HMAC-based password hash
             var user = new User
             {
                 Id = Guid.NewGuid(),
                 Email = request.Email.ToLower().Trim(),
                 FirstName = request.FirstName.Trim(),
                 LastName = request.LastName.Trim(),
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
+                PasswordHash = _passwordHasher.HashPassword(request.Password),
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -77,8 +80,8 @@ public class AuthBL : IAuthBL
                 throw new UnauthorizedAccessException("Invalid email or password.");
             }
 
-            // Validate password
-            if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+            // Validate password with HMAC verification
+            if (!_passwordHasher.VerifyPassword(request.Password, user.PasswordHash))
             {
                 throw new UnauthorizedAccessException("Invalid email or password.");
             }

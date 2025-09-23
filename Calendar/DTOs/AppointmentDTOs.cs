@@ -5,7 +5,7 @@ namespace Calendar.DTOs;
 // Create Appointment Request
 public class CreateAppointmentRequestDto
 {
-    [Required] [MaxLength(200)] public string Title { get; set; } = string.Empty;
+    [MaxLength(200)] public string Title { get; set; } = string.Empty;
 
     [MaxLength(1000)] public string? Description { get; set; }
 
@@ -105,7 +105,7 @@ public class RecurrenceRequestDto
 // Update Appointment Request
 public class UpdateAppointmentRequestDto
 {
-    [Required] [MaxLength(200)] public string Title { get; set; } = string.Empty;
+    [MaxLength(200)] public string Title { get; set; } = string.Empty;
 
     [MaxLength(1000)] public string? Description { get; set; }
 

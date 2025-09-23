@@ -25,11 +25,12 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Calendar API", Version = "v1" });
-    
+
     // Add JWT Authentication to Swagger
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below.",
+        Description =
+            "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below.",
         Name = "Authorization",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.ApiKey,
@@ -66,29 +67,52 @@ if (string.IsNullOrEmpty(jwtSecretKey))
 var key = Encoding.ASCII.GetBytes(jwtSecretKey);
 
 builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.RequireHttpsMetadata = false; // Set to true in production
-    options.SaveToken = true;
-    options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(key),
-        ValidateIssuer = true,
-        ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
-        ValidateAudience = true,
-        ValidAudience = builder.Configuration["JwtSettings:Audience"],
-        ValidateLifetime = true,
-        ClockSkew = TimeSpan.Zero
-    };
-});
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.RequireHttpsMetadata = false; // Set to true in production
+        options.SaveToken = true;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration["JwtSettings:Audience"],
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
+        };
+    });
 
-// Register PasswordHasher
-builder.Services.AddSingleton<PasswordHasher>();
+if (builder.Environment.IsDevelopment())
+{
+    // In development, use Scoped to pick up .env changes without restart
+    builder.Services.AddScoped<JwtHelper>();
+    builder.Services.AddScoped<PasswordHasher>();
+}
+else
+{
+    // In production, use Singleton for performance
+    builder.Services.AddSingleton<JwtHelper>();
+    builder.Services.AddSingleton<PasswordHasher>();
+}
+
+// Scoped pros
+//     DbContext Compatibility - DbContext is scoped, DAL can safely use it
+//     No Thread Safety Concerns - Each request gets its own instance
+//     Transaction Support - Can maintain transactions within request scope
+//     Memory Management - Disposed after each request
+//     State Isolation - No risk of data bleeding between requests
+
+// Singleton cons
+//     Cannot Use DbContext - DbContext is scoped, causes runtime error
+//     Thread Safety Required - Complex concurrent access handling
+//     Connection Management - Must manage DB connections manually
+//     Memory Leaks Risk - Data accumulation over time
 
 // Dependency Injection
 builder.Services.AddScoped<IAuthBL, AuthBL>();
@@ -101,7 +125,6 @@ builder.Services.AddScoped<IUserDAL, UserDAL>();
 builder.Services.AddScoped<IAppointmentAttendeeDAL, AppointmentAttendeeDAL>();
 builder.Services.AddScoped<IAppointmentTypeDAL, AppointmentTypeDAL>();
 
-builder.Services.AddScoped<JwtHelper>();
 
 // CORS Configuration
 builder.Services.AddCors(options =>
@@ -109,8 +132,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAll", policy =>
     {
         policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
+            .AllowAnyMethod()
+            .AllowAnyHeader();
     });
 });
 
@@ -125,10 +148,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Calendar API V1");
-    });
+    app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "Calendar API V1"); });
 }
 
 app.UseHttpsRedirection();

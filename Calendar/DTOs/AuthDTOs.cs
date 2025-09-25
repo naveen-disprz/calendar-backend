@@ -43,7 +43,7 @@ namespace Calendar.DTOs
     // Auth Response
     public class AuthResponseDto
     {
-        public string Token { get; set; } = string.Empty;
+        public string? Token { get; set; } = string.Empty;
         public DateTime ExpiresAt { get; set; }
         public UserResponseDto User { get; set; } = new();
     }

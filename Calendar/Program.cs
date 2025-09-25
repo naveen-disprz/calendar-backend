@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using DotNetEnv;
+using Microsoft.AspNetCore.CookiePolicy;
 
 // Load .env file at the very beginning
 Env.Load();
@@ -102,14 +103,26 @@ builder.Services.AddAuthentication(options =>
             ValidateLifetime = true,
             ClockSkew = TimeSpan.Zero
         };
+        
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                // Read token from cookie
+                context.Token = context.Request.Cookies["jwt"];
+                return Task.CompletedTask;
+            }
+        };
     });
+
+
 
 
 // In production, use Singleton for performance
 builder.Services.AddSingleton<JwtHelper>();
 builder.Services.AddSingleton<PasswordHasher>();
+// builder.Services.AddSingleton<ICookieHelper, CookieHelper>();
 // builder.Services.AddSingleton<IJwtHelper, JwtHelper>();
-
 
 // Scoped pros
 //     DbContext Compatibility - DbContext is scoped, DAL can safely use it
@@ -136,16 +149,17 @@ builder.Services.AddScoped<IAppointmentAttendeeDAL, AppointmentAttendeeDAL>();
 builder.Services.AddScoped<IAppointmentTypeDAL, AppointmentTypeDAL>();
 
 
-// CORS Configuration
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
+    options.AddPolicy("AllowLocalhost3000", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins("http://localhost:3000") // 👈 exact frontend origin
             .AllowAnyMethod()
-            .AllowAnyHeader();
+            .AllowAnyHeader()
+            .AllowCredentials(); // 👈 required for cookies
     });
 });
+
 
 // Logging Configuration
 builder.Logging.ClearProviders();
@@ -162,7 +176,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCors("AllowAll");
+app.UseCors("AllowLocalhost3000");
+app.UseCookiePolicy();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

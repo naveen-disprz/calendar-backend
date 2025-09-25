@@ -88,7 +88,7 @@ namespace Calendar.IntegrationTests.Common
             };
 
             var signupResponse = await Client.PostAsync("/api/auth/signup", CreateJsonContent(signupRequest));
-            signupResponse.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
+            signupResponse.StatusCode.Should().Be(System.Net.HttpStatusCode.Created);
             
             var loginResponse = await Client.PostAsync("/api/auth/login", CreateJsonContent(loginRequest));
             loginResponse.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);

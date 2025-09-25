@@ -86,12 +86,11 @@ namespace Calendar.Tests.Controllers
                 .ReturnsAsync(expectedResponse);
 
             // Act
-            var result = await _controller.CreateAppointment(request);
+            var result = await _controller.CreateAppointmentAsync(request);
 
             // Assert
-            var createdAtActionResult = result.Result.Should().BeOfType<CreatedAtActionResult>().Subject;
+            var createdAtActionResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
             createdAtActionResult.StatusCode.Should().Be(201);
-            createdAtActionResult.ActionName.Should().Be(nameof(_controller.CreateAppointment));
 
             var response = createdAtActionResult.Value.Should().BeOfType<AppointmentResponseDto>().Subject;
             response.Id.Should().Be(expectedResponse.Id);
@@ -125,7 +124,7 @@ namespace Calendar.Tests.Controllers
             _controller.ModelState.AddModelError("Location", "Location exceeds maximum length");
 
             // Act
-            var result = await _controller.CreateAppointment(request);
+            var result = await _controller.CreateAppointmentAsync(request);
 
             // Assert
             var badRequestResult = result.Result.Should().BeOfType<BadRequestObjectResult>().Subject;
@@ -153,7 +152,7 @@ namespace Calendar.Tests.Controllers
             };
 
             // Act
-            var result = await _controller.CreateAppointment(request);
+            var result = await _controller.CreateAppointmentAsync(request);
 
             // Assert
             var unauthorizedResult = result.Result.Should().BeOfType<UnauthorizedObjectResult>().Subject;
@@ -182,7 +181,7 @@ namespace Calendar.Tests.Controllers
                 .ThrowsAsync(new InvalidOperationException("Appointment conflicts with existing appointment"));
 
             // Act
-            var result = await _controller.CreateAppointment(request);
+            var result = await _controller.CreateAppointmentAsync(request);
 
             // Assert
             var conflictResult = result.Result.Should().BeOfType<ConflictObjectResult>().Subject;
@@ -210,7 +209,7 @@ namespace Calendar.Tests.Controllers
                 .ThrowsAsync(new ArgumentException("End time must be after start time"));
 
             // Act
-            var result = await _controller.CreateAppointment(request);
+            var result = await _controller.CreateAppointmentAsync(request);
 
             // Assert
             var badRequestResult = result.Result.Should().BeOfType<BadRequestObjectResult>().Subject;
@@ -236,7 +235,7 @@ namespace Calendar.Tests.Controllers
                 .ThrowsAsync(new UnauthorizedAccessException("User not authorized"));
 
             // Act
-            var result = await _controller.CreateAppointment(request);
+            var result = await _controller.CreateAppointmentAsync(request);
 
             // Assert
             var unauthorizedResult = result.Result.Should().BeOfType<UnauthorizedObjectResult>().Subject;
@@ -262,7 +261,7 @@ namespace Calendar.Tests.Controllers
                 .ThrowsAsync(new Exception("Database connection failed"));
 
             // Act
-            var result = await _controller.CreateAppointment(request);
+            var result = await _controller.CreateAppointmentAsync(request);
 
             // Assert
             var objectResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
@@ -319,7 +318,7 @@ namespace Calendar.Tests.Controllers
                 .ReturnsAsync(expectedResponse);
 
             // Act
-            var result = await _controller.UpdateAppointment(appointmentId, request);
+            var result = await _controller.UpdateAppointmentAsync(appointmentId, request);
 
             // Assert
             var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
@@ -349,7 +348,7 @@ namespace Calendar.Tests.Controllers
                 .ThrowsAsync(new ArgumentException("Appointment not found"));
 
             // Act
-            var result = await _controller.UpdateAppointment(appointmentId, request);
+            var result = await _controller.UpdateAppointmentAsync(appointmentId, request);
 
             // Assert
             var notFoundResult = result.Result.Should().BeOfType<NotFoundObjectResult>().Subject;
@@ -376,7 +375,7 @@ namespace Calendar.Tests.Controllers
                 .ThrowsAsync(new UnauthorizedAccessException("Only organizer can update appointment"));
 
             // Act
-            var result = await _controller.UpdateAppointment(appointmentId, request);
+            var result = await _controller.UpdateAppointmentAsync(appointmentId, request);
 
             // Assert
             var unauthorizedResult = result.Result.Should().BeOfType<UnauthorizedObjectResult>().Subject;
@@ -423,7 +422,7 @@ namespace Calendar.Tests.Controllers
                 .ReturnsAsync(expectedAppointments);
 
             // Act
-            var result = await _controller.GetAppointments(fromDate, toDate, appointmentTypeId, true);
+            var result = await _controller.GetAppointmentsAsync(fromDate, toDate, appointmentTypeId, true);
 
             // Assert
             var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
@@ -458,7 +457,7 @@ namespace Calendar.Tests.Controllers
                 .ReturnsAsync(expectedAppointments);
 
             // Act
-            var result = await _controller.GetAppointments(null, null, null, true);
+            var result = await _controller.GetAppointmentsAsync(null, null, null, true);
 
             // Assert
             result.Result.Should().BeOfType<OkObjectResult>();
@@ -481,7 +480,7 @@ namespace Calendar.Tests.Controllers
             var toDate = DateTime.Today; // Before fromDate
 
             // Act
-            var result = await _controller.GetAppointments(fromDate, toDate, null, true);
+            var result = await _controller.GetAppointmentsAsync(fromDate, toDate, null, true);
 
             // Assert
             var badRequestResult = result.Result.Should().BeOfType<BadRequestObjectResult>().Subject;
@@ -500,7 +499,7 @@ namespace Calendar.Tests.Controllers
             var toDate = DateTime.Today.AddDays(400); // Exceeds 365 days
 
             // Act
-            var result = await _controller.GetAppointments(fromDate, toDate, null, true);
+            var result = await _controller.GetAppointmentsAsync(fromDate, toDate, null, true);
 
             // Assert
             var badRequestResult = result.Result.Should().BeOfType<BadRequestObjectResult>().Subject;
@@ -524,7 +523,7 @@ namespace Calendar.Tests.Controllers
                 .ReturnsAsync(true);
 
             // Act
-            var result = await _controller.DeleteAppointment(appointmentId);
+            var result = await _controller.DeleteAppointmentAsync(appointmentId);
 
             // Assert
             result.Should().BeOfType<NoContentResult>();
@@ -553,7 +552,7 @@ namespace Calendar.Tests.Controllers
                 .ReturnsAsync(false);
 
             // Act
-            var result = await _controller.DeleteAppointment(appointmentId);
+            var result = await _controller.DeleteAppointmentAsync(appointmentId);
 
             // Assert
             var notFoundResult = result.Should().BeOfType<NotFoundObjectResult>().Subject;
@@ -573,7 +572,7 @@ namespace Calendar.Tests.Controllers
                 .ThrowsAsync(new UnauthorizedAccessException("Only organizer can delete appointment"));
 
             // Act
-            var result = await _controller.DeleteAppointment(appointmentId);
+            var result = await _controller.DeleteAppointmentAsync(appointmentId);
 
             // Assert
             var unauthorizedResult = result.Should().BeOfType<UnauthorizedObjectResult>().Subject;
@@ -603,7 +602,7 @@ namespace Calendar.Tests.Controllers
                 .ReturnsAsync(expectedTypes);
 
             // Act
-            var result = await _controller.GetAppointmentTypes();
+            var result = await _controller.GetAppointmentTypesAsync();
 
             // Assert
             var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
@@ -621,7 +620,7 @@ namespace Calendar.Tests.Controllers
             SetupUserContext("invalid-guid");
 
             // Act
-            var result = await _controller.GetAppointmentTypes();
+            var result = await _controller.GetAppointmentTypesAsync();
 
             // Assert
             var unauthorizedResult = result.Should().BeOfType<UnauthorizedObjectResult>().Subject;
@@ -640,7 +639,7 @@ namespace Calendar.Tests.Controllers
                 .ThrowsAsync(new Exception("Database error"));
 
             // Act
-            var result = await _controller.GetAppointmentTypes();
+            var result = await _controller.GetAppointmentTypesAsync();
 
             // Assert
             var objectResult = result.Should().BeOfType<ObjectResult>().Subject;
@@ -671,7 +670,7 @@ namespace Calendar.Tests.Controllers
             };
 
             // Act
-            var result = await _controller.CreateAppointment(request);
+            var result = await _controller.CreateAppointmentAsync(request);
 
             // Assert
             var unauthorizedResult = result.Result.Should().BeOfType<UnauthorizedObjectResult>().Subject;
@@ -730,10 +729,10 @@ namespace Calendar.Tests.Controllers
                 .ReturnsAsync(expectedResponse);
 
             // Act
-            var result = await _controller.CreateAppointment(request);
+            var result = await _controller.CreateAppointmentAsync(request);
 
             // Assert
-            var createdAtActionResult = result.Result.Should().BeOfType<CreatedAtActionResult>().Subject;
+            var createdAtActionResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
             var response = createdAtActionResult.Value.Should().BeOfType<AppointmentResponseDto>().Subject;
             response.IsRecurring.Should().BeTrue();
             response.Recurrence.Should().NotBeNull();
@@ -781,7 +780,7 @@ namespace Calendar.Tests.Controllers
                 .ReturnsAsync(expectedResponse);
 
             // Act
-            var result = await _controller.UpdateAppointment(appointmentId, request);
+            var result = await _controller.UpdateAppointmentAsync(appointmentId, request);
 
             // Assert
             var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;

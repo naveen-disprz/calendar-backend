@@ -28,7 +28,7 @@ public class AppointmentController : ControllerBase
     /// <param name="request">Create appointment request</param>
     /// <returns>Created appointment details</returns>
     [HttpPost]
-    public async Task<ActionResult<AppointmentResponseDto>> CreateAppointment(
+    public async Task<ActionResult<AppointmentResponseDto>> CreateAppointmentAsync(
         [FromBody] CreateAppointmentRequestDto request)
     {
         try
@@ -55,10 +55,11 @@ public class AppointmentController : ControllerBase
             _logger.LogInformation("Appointment created successfully: {AppointmentId} by user {UserId}",
                 result.Id, userId);
 
-            return CreatedAtAction(
-                nameof(CreateAppointment),
-                new { id = result.Id },
-                result);
+            return StatusCode(StatusCodes.Status201Created, result);
+            // return CreatedAtAction(
+            //     nameof(CreateAppointmentAsync),
+            //     new { id = result.Id },
+            //     result);
         }
         catch (InvalidOperationException ex)
         {
@@ -90,7 +91,7 @@ public class AppointmentController : ControllerBase
     /// <param name="request">Update appointment request</param>
     /// <returns>Updated appointment details</returns>
     [HttpPut("{id}")]
-    public async Task<ActionResult<AppointmentResponseDto>> UpdateAppointment(Guid id,
+    public async Task<ActionResult<AppointmentResponseDto>> UpdateAppointmentAsync(Guid id,
         [FromBody] UpdateAppointmentRequestDto request)
     {
         try
@@ -143,7 +144,7 @@ public class AppointmentController : ControllerBase
     }
     
     [HttpGet]
-        public async Task<ActionResult<List<AppointmentResponseDto>>> GetAppointments(
+        public async Task<ActionResult<List<AppointmentResponseDto>>> GetAppointmentsAsync(
             [FromQuery] DateTime? fromDate = null,
             [FromQuery] DateTime? toDate = null,
             [FromQuery] Guid? appointmentTypeId = null,
@@ -202,7 +203,7 @@ public class AppointmentController : ControllerBase
         }
         
     [HttpDelete("{id}")]
-    public async Task<ActionResult> DeleteAppointment(Guid id)
+    public async Task<ActionResult> DeleteAppointmentAsync(Guid id)
     {
         try
         {
@@ -246,7 +247,7 @@ public class AppointmentController : ControllerBase
     }
     
     [HttpGet("types")]
-    public async Task<ActionResult> GetAppointmentTypes()
+    public async Task<ActionResult> GetAppointmentTypesAsync()
     {
         try
         {

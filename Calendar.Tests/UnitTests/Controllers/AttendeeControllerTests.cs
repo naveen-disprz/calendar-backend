@@ -79,7 +79,7 @@ namespace Calendar.Tests.Controllers
                 .ReturnsAsync(expectedAttendees);
 
             // Act
-            var result = await _controller.GetAllAttendees(excludeCurrentUser: true);
+            var result = await _controller.GetAllAttendeesAsync(excludeCurrentUser: true);
 
             // Assert
             var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
@@ -119,7 +119,7 @@ namespace Calendar.Tests.Controllers
                 .ReturnsAsync(expectedAttendees);
 
             // Act
-            var result = await _controller.GetAllAttendees(excludeCurrentUser: false);
+            var result = await _controller.GetAllAttendeesAsync(excludeCurrentUser: false);
 
             // Assert
             var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
@@ -139,7 +139,7 @@ namespace Calendar.Tests.Controllers
             _controller.ControllerContext.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity());
 
             // Act
-            var result = await _controller.GetAllAttendees();
+            var result = await _controller.GetAllAttendeesAsync();
 
             // Assert
             var unauthorizedResult = result.Result.Should().BeOfType<UnauthorizedObjectResult>().Subject;
@@ -159,7 +159,7 @@ namespace Calendar.Tests.Controllers
                 .ThrowsAsync(new ArgumentException(errorMessage));
 
             // Act
-            var result = await _controller.GetAllAttendees();
+            var result = await _controller.GetAllAttendeesAsync();
 
             // Assert
             var badRequestResult = result.Result.Should().BeOfType<BadRequestObjectResult>().Subject;
@@ -187,7 +187,7 @@ namespace Calendar.Tests.Controllers
                 .ThrowsAsync(exception);
 
             // Act
-            var result = await _controller.GetAllAttendees();
+            var result = await _controller.GetAllAttendeesAsync();
 
             // Assert
             var statusCodeResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
@@ -215,7 +215,7 @@ namespace Calendar.Tests.Controllers
                 .ReturnsAsync(new List<AttendeeResponseDto>());
 
             // Act
-            var result = await _controller.GetAllAttendees();
+            var result = await _controller.GetAllAttendeesAsync();
 
             // Assert
             var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
@@ -260,7 +260,7 @@ namespace Calendar.Tests.Controllers
                 .ReturnsAsync(expectedResponse);
 
             // Act
-            var result = await _controller.CheckAttendeeAvailability(request);
+            var result = await _controller.CheckAttendeeAvailabilityAsync(request);
 
             // Assert
             var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
@@ -316,7 +316,7 @@ namespace Calendar.Tests.Controllers
                 .ReturnsAsync(expectedResponse);
 
             // Act
-            var result = await _controller.CheckAttendeeAvailability(request);
+            var result = await _controller.CheckAttendeeAvailabilityAsync(request);
 
             // Assert
             var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
@@ -353,7 +353,7 @@ namespace Calendar.Tests.Controllers
                 .ReturnsAsync(expectedResponse);
 
             // Act
-            var result = await _controller.CheckAttendeeAvailability(request);
+            var result = await _controller.CheckAttendeeAvailabilityAsync(request);
 
             // Assert
             var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
@@ -381,7 +381,7 @@ namespace Calendar.Tests.Controllers
             _controller.ModelState.AddModelError("AttendeeId", "Invalid attendee ID");
 
             // Act
-            var result = await _controller.CheckAttendeeAvailability(request);
+            var result = await _controller.CheckAttendeeAvailabilityAsync(request);
 
             // Assert
             var badRequestResult = result.Result.Should().BeOfType<BadRequestObjectResult>().Subject;
@@ -409,7 +409,7 @@ namespace Calendar.Tests.Controllers
             };
 
             // Act
-            var result = await _controller.CheckAttendeeAvailability(request);
+            var result = await _controller.CheckAttendeeAvailabilityAsync(request);
 
             // Assert
             var unauthorizedResult = result.Result.Should().BeOfType<UnauthorizedObjectResult>().Subject;
@@ -434,7 +434,7 @@ namespace Calendar.Tests.Controllers
                 .ThrowsAsync(new ArgumentException(errorMessage));
 
             // Act
-            var result = await _controller.CheckAttendeeAvailability(request);
+            var result = await _controller.CheckAttendeeAvailabilityAsync(request);
 
             // Assert
             var badRequestResult = result.Result.Should().BeOfType<BadRequestObjectResult>().Subject;
@@ -469,7 +469,7 @@ namespace Calendar.Tests.Controllers
                 .ThrowsAsync(exception);
 
             // Act
-            var result = await _controller.CheckAttendeeAvailability(request);
+            var result = await _controller.CheckAttendeeAvailabilityAsync(request);
 
             // Assert
             var statusCodeResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
@@ -530,7 +530,7 @@ namespace Calendar.Tests.Controllers
                 .ReturnsAsync(expectedAttendees);
 
             // Act
-            var result = await _controller.GetAppointmentAttendees(appointmentId);
+            var result = await _controller.GetAppointmentAttendeesAsync(appointmentId);
 
             // Assert
             var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
@@ -561,7 +561,7 @@ namespace Calendar.Tests.Controllers
                 .ReturnsAsync(new List<AttendeeResponseDto>());
 
             // Act
-            var result = await _controller.GetAppointmentAttendees(appointmentId);
+            var result = await _controller.GetAppointmentAttendeesAsync(appointmentId);
 
             // Assert
             var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
@@ -591,7 +591,7 @@ namespace Calendar.Tests.Controllers
                 .ThrowsAsync(new ArgumentException(errorMessage));
 
             // Act
-            var result = await _controller.GetAppointmentAttendees(appointmentId);
+            var result = await _controller.GetAppointmentAttendeesAsync(appointmentId);
 
             // Assert
             var notFoundResult = result.Result.Should().BeOfType<NotFoundObjectResult>().Subject;
@@ -618,7 +618,7 @@ namespace Calendar.Tests.Controllers
             var appointmentId = Guid.NewGuid();
 
             // Act
-            var result = await _controller.GetAppointmentAttendees(appointmentId);
+            var result = await _controller.GetAppointmentAttendeesAsync(appointmentId);
 
             // Assert
             var unauthorizedResult = result.Result.Should().BeOfType<UnauthorizedObjectResult>().Subject;
@@ -640,7 +640,7 @@ namespace Calendar.Tests.Controllers
                 .ThrowsAsync(exception);
 
             // Act
-            var result = await _controller.GetAppointmentAttendees(appointmentId);
+            var result = await _controller.GetAppointmentAttendeesAsync(appointmentId);
 
             // Assert
             var statusCodeResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
@@ -683,8 +683,8 @@ namespace Calendar.Tests.Controllers
                 .ReturnsAsync(expectedAttendees);
 
             // Act
-            var result1 = await _controller.GetAppointmentAttendees(appointmentId);
-            var result2 = await _controller.GetAppointmentAttendees(appointmentId);
+            var result1 = await _controller.GetAppointmentAttendeesAsync(appointmentId);
+            var result2 = await _controller.GetAppointmentAttendeesAsync(appointmentId);
 
             // Assert
             var okResult1 = result1.Result.Should().BeOfType<OkObjectResult>().Subject;

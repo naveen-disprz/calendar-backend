@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Xunit.Abstractions;
 
 namespace Calendar.Tests.Controllers;
@@ -18,13 +19,16 @@ public class AuthControllerTests
     private readonly Mock<IAuthBL> _mockAuthBL;
     private readonly Mock<ILogger<AuthController>> _mockLogger;
     private readonly AuthController _controller;
+    private readonly Mock<ICookieHelper> _mockCookieService;
+
 
     public AuthControllerTests(ITestOutputHelper testOutputHelper)
     {
         _testOutputHelper = testOutputHelper;
         _mockAuthBL = new Mock<IAuthBL>();
         _mockLogger = new Mock<ILogger<AuthController>>();
-        _controller = new AuthController(_mockAuthBL.Object, _mockLogger.Object);
+        _mockCookieService = new Mock<ICookieHelper>();
+        _controller = new AuthController(_mockAuthBL.Object, _mockLogger.Object, _mockCookieService.Object);
     }
 
     #region Signup Tests
@@ -61,13 +65,14 @@ public class AuthControllerTests
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _controller.Signup(signupRequest);
+        var result = await _controller.SignupAsync(signupRequest);
 
 
         // Assert
-        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        var okResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
         var authResponse = okResult.Value.Should().BeOfType<AuthResponseDto>().Subject;
-        authResponse.Token.Should().Be(expectedResponse.Token);
+        // _testOutputHelper.WriteLine(authResponse.Message);
+        authResponse.Token.Should().BeNull();
 
         _mockAuthBL.Verify(x => x.SignupAsync(signupRequest), Times.Once);
     }
@@ -88,7 +93,7 @@ public class AuthControllerTests
             .ThrowsAsync(new InvalidOperationException("User with this email already exists."));
 
         // Act
-        var result = await _controller.Signup(signupRequest);
+        var result = await _controller.SignupAsync(signupRequest);
 
         // Assert
         var conflictResult = result.Result.Should().BeOfType<ConflictObjectResult>().Subject;
@@ -110,7 +115,7 @@ public class AuthControllerTests
         _controller.ModelState.AddModelError("Email", "Invalid email format");
 
         // Act
-        var result = await _controller.Signup(signupRequest);
+        var result = await _controller.SignupAsync(signupRequest);
 
         // Assert
         var badRequestResult = result.Result.Should().BeOfType<BadRequestObjectResult>().Subject;
@@ -135,7 +140,7 @@ public class AuthControllerTests
             .ThrowsAsync(unexpectedException);
 
         // Act
-        var result = await _controller.Signup(signupRequest);
+        var result = await _controller.SignupAsync(signupRequest);
 
         // Assert
         var objectResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
@@ -160,8 +165,7 @@ public class AuthControllerTests
     }
 
     #endregion
-    
-    
+
 
     #region Login Tests
 
@@ -171,7 +175,7 @@ public class AuthControllerTests
         // Arrange
         var loginRequest = new LoginRequestDto
         {
-            Email = "user@example.com",
+            Email = "naveen@gmail.com",
             Password = "Test@123"
         };
 
@@ -190,20 +194,18 @@ public class AuthControllerTests
                 CreatedAt = DateTime.UtcNow
             }
         };
-        
-        
 
         _mockAuthBL.Setup(x => x.LoginAsync(loginRequest))
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _controller.Login(loginRequest);
+        var result = await _controller.LoginAsync(loginRequest);
 
         // Assert
-        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject; // Changed from ObjectResult to OkObjectResult
         var authResponse = okResult.Value.Should().BeOfType<AuthResponseDto>().Subject;
         authResponse.Token.Should().Be(expectedResponse.Token);
-
+        
         _mockAuthBL.Verify(x => x.LoginAsync(loginRequest), Times.Once);
     }
 
@@ -221,7 +223,7 @@ public class AuthControllerTests
             .ThrowsAsync(new UnauthorizedAccessException("Invalid email or password."));
 
         // Act
-        var result = await _controller.Login(loginRequest);
+        var result = await _controller.LoginAsync(loginRequest);
 
         // Assert
         var unauthorizedResult = result.Result.Should().BeOfType<UnauthorizedObjectResult>().Subject;
@@ -241,13 +243,13 @@ public class AuthControllerTests
         _controller.ModelState.AddModelError("Email", "Email is required");
 
         // Act
-        var result = await _controller.Login(loginRequest);
+        var result = await _controller.LoginAsync(loginRequest);
 
         // Assert
         var badRequestResult = result.Result.Should().BeOfType<BadRequestObjectResult>().Subject;
         _mockAuthBL.Verify(x => x.LoginAsync(It.IsAny<LoginRequestDto>()), Times.Never);
     }
-    
+
     [Fact]
     public async Task Login_WithInternalServerError_ShouldReturnInternalServerError()
     {
@@ -264,7 +266,7 @@ public class AuthControllerTests
             .ThrowsAsync(unexpectedException);
 
         // Act
-        var result = await _controller.Login(loginRequest);
+        var result = await _controller.LoginAsync(loginRequest);
 
         // Assert
         var objectResult = result.Result.Should().BeOfType<ObjectResult>().Subject;

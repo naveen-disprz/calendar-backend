@@ -11,6 +11,7 @@
           <ExcludeByFile>**/Migrations/*.cs</ExcludeByFile>
           <ExcludeByFile>Calendar/Program.cs</ExcludeByFile>
           <ExcludeByFile>**/Startup.cs</ExcludeByFile>
+          <ExcludeByFile>Calendar\Utils\CookieHelper.cs</ExcludeByFile>
 
           <!-- Exclude types/classes -->
           <ExcludeByType>Program</ExcludeByType>

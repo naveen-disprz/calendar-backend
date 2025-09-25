@@ -31,7 +31,7 @@ namespace Calendar.Controllers
         /// <param name="pageSize">Page size for pagination (default: 50, max: 100)</param>
         /// <returns>List of available users</returns>
         [HttpGet]
-        public async Task<ActionResult<AttendeeResponseDto>> GetAllAttendees(
+        public async Task<ActionResult<AttendeeResponseDto>> GetAllAttendeesAsync(
             [FromQuery] bool excludeCurrentUser = true)
         {
             try
@@ -63,7 +63,7 @@ namespace Calendar.Controllers
         }
 
         [HttpPost("checkAvailability")]
-        public async Task<ActionResult<AvailabilityResponseDto>> CheckAttendeeAvailability(
+        public async Task<ActionResult<AvailabilityResponseDto>> CheckAttendeeAvailabilityAsync(
             [FromBody] CheckAvailabilityRequestDto request)
         {
             try
@@ -106,7 +106,7 @@ namespace Calendar.Controllers
         }
         
         [HttpGet("appointment/{appointmentId}")]
-        public async Task<ActionResult<List<AttendeeResponseDto>>> GetAppointmentAttendees(Guid appointmentId)
+        public async Task<ActionResult<List<AttendeeResponseDto>>> GetAppointmentAttendeesAsync(Guid appointmentId)
         {
             try
             {

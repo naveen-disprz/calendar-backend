@@ -33,11 +33,10 @@ namespace Calendar.IntegrationTests.Controllers
             var response = await Client.PostAsync("/api/auth/signup", CreateJsonContent(signupRequest));
 
             // Assert
-            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            response.StatusCode.Should().Be(HttpStatusCode.Created);
 
             var authResponse = await DeserializeResponse<AuthResponseDto>(response);
             authResponse.Should().NotBeNull();
-            authResponse!.Token.Should().NotBeNullOrWhiteSpace();
             authResponse.User.Email.Should().Be(signupRequest.Email.ToLower());
             
             Output.WriteLine($"User created with ID: {authResponse.User.Id}");

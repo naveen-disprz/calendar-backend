@@ -10,22 +10,24 @@ namespace Calendar.Controllers
     {
         private readonly IAuthBL _authBL;
         private readonly ILogger<AuthController> _logger;
+        private readonly ICookieHelper _cookieHelper;
+
 
         public AuthController(
             IAuthBL authBL,
-            ILogger<AuthController> logger)
+            ILogger<AuthController> logger,
+            ICookieHelper cookieHelper = null
+        )
+
         {
             _authBL = authBL;
             _logger = logger;
+            _cookieHelper = cookieHelper;
+
         }
 
-        /// <summary>
-        /// Register a new user
-        /// </summary>
-        /// <param name="request">Signup request</param>
-        /// <returns>Authentication response with token</returns>
         [HttpPost("signup")]
-        public async Task<ActionResult<AuthResponseDto>> Signup([FromBody] SignupRequestDto request)
+        public async Task<ActionResult<AuthResponseDto>> SignupAsync([FromBody] SignupRequestDto request)
         {
             try
             {
@@ -41,15 +43,17 @@ namespace Calendar.Controllers
 
                 var result = await _authBL.SignupAsync(request);
 
+                // Don't send token in response body
+                result.Token = null; // Or remove from DTO entirely
+
                 _logger.LogInformation("User signup successful: {Email}", request.Email);
 
-                return Ok(result);
+                return StatusCode(StatusCodes.Status201Created, result);
             }
             catch (InvalidOperationException ex)
             {
-                _logger.LogWarning("Signup failed - user exists: {Email}, Error: {Message}", 
+                _logger.LogWarning("Signup failed - user exists: {Email}, Error: {Message}",
                     request.Email, ex.Message);
-
                 return Conflict(new ErrorResponseDto(ex.Message));
             }
             catch (Exception ex)
@@ -60,13 +64,8 @@ namespace Calendar.Controllers
             }
         }
 
-        /// <summary>
-        /// Authenticate user and return token
-        /// </summary>
-        /// <param name="request">Login request</param>
-        /// <returns>Authentication response with token</returns>
         [HttpPost("login")]
-        public async Task<ActionResult<AuthResponseDto>> Login([FromBody] LoginRequestDto request)
+        public async Task<ActionResult<AuthResponseDto>> LoginAsync([FromBody] LoginRequestDto request)
         {
             try
             {
@@ -82,22 +81,24 @@ namespace Calendar.Controllers
 
                 var result = await _authBL.LoginAsync(request);
 
+                // Set JWT in httpOnly cookie
+                _cookieHelper?.SetAuthenticationCookie(result.Token!, result.ExpiresAt);
+                
                 _logger.LogInformation("User login successful: {Email}", request.Email);
 
                 return Ok(result);
             }
             catch (UnauthorizedAccessException ex)
             {
-                _logger.LogWarning("Login failed - invalid credentials: {Email}, Error: {Message}", 
+                _logger.LogWarning("Login failed - invalid credentials: {Email}, Error: {Message}",
                     request.Email, ex.Message);
-
                 return Unauthorized(new ErrorResponseDto("Invalid email or password"));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Login failed: {Email}", request.Email);
-
                 return StatusCode(500, new ErrorResponseDto("An error occurred during login"));
+                // return StatusCode(500, new ErrorResponseDto(ex.Message));
             }
         }
     }

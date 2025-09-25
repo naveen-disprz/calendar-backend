@@ -6,7 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Calendar.Utils;
 
-public class JwtHelper
+public class JwtHelper :  IJwtHelper
 {
     private readonly IConfiguration _configuration;
     private readonly ILogger<JwtHelper> _logger;
@@ -17,7 +17,7 @@ public class JwtHelper
         _logger = logger;
     }
 
-    public string GenerateToken(User user)
+    public virtual string GenerateToken(User user)
     {
         // Try to get JWT secret from environment variable first, then from appsettings
         var secretKey = _configuration["JWT_SECRET_KEY"] ?? _configuration["JwtSettings:SecretKey"];
@@ -52,7 +52,7 @@ public class JwtHelper
         return tokenHandler.WriteToken(token);
     }
 
-    public DateTime GetTokenExpiry()
+    public virtual DateTime GetTokenExpiry()
     {
         return DateTime.UtcNow.AddMinutes(GetExpiryMinutes());
     }

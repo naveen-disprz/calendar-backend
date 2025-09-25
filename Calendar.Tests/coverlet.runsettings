@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat code coverage">
+        <Configuration>
+          <Format>cobertura</Format>
+          <Format>opencover</Format>
+
+          <!-- Exclude files -->
+          <ExcludeByFile>**/Migrations/*.cs</ExcludeByFile>
+          <ExcludeByFile>Calendar/Program.cs</ExcludeByFile>
+          <ExcludeByFile>**/Startup.cs</ExcludeByFile>
+
+          <!-- Exclude types/classes -->
+          <ExcludeByType>Program</ExcludeByType>
+
+          <!-- Optional: exclude auto-generated code -->
+          <ExcludeByAttribute>CompilerGeneratedAttribute</ExcludeByAttribute>
+          <ExcludeByAttribute>GeneratedCodeAttribute</ExcludeByAttribute>
+
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>
+

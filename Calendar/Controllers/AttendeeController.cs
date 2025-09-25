@@ -105,49 +105,6 @@ namespace Calendar.Controllers
             }
         }
         
-        // [HttpPost("checkBulkAvailability")]
-        // public async Task<ActionResult<BulkAvailabilityResponseDto>> CheckBulkAttendeeAvailability(
-        //     [FromBody] BulkAvailabilityRequestDto request)
-        // {
-        //     try
-        //     {
-        //         if (!ModelState.IsValid)
-        //         {
-        //             var errors = ModelState.Values
-        //                 .SelectMany(v => v.Errors)
-        //                 .Select(e => e.ErrorMessage)
-        //                 .ToList();
-        //
-        //             return BadRequest(new ErrorResponseDto("Validation failed", errors));
-        //         }
-        //
-        //         // Get user ID from JWT token for logging
-        //         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        //         if (!Guid.TryParse(userIdClaim, out var currentUserId))
-        //         {
-        //             return Unauthorized(new ErrorResponseDto("Invalid user token"));
-        //         }
-        //
-        //         var result = await _appointmentAttendeeBL.CheckBulkAttendeeAvailabilityAsync(request);
-        //
-        //         _logger.LogInformation("Bulk availability check by user {UserId} for {Count} attendees: {Available}/{Total} available",
-        //             currentUserId, request.AttendeeIds.Count, result.AvailableCount, result.AttendeeAvailabilities.Count);
-        //
-        //         return Ok(result);
-        //     }
-        //     catch (ArgumentException ex)
-        //     {
-        //         _logger.LogWarning("Bulk availability check failed - invalid argument: {Message}", ex.Message);
-        //         return BadRequest(new ErrorResponseDto(ex.Message));
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         _logger.LogError(ex, "Bulk availability check failed for {Count} attendees by user {UserId}",
-        //             request.AttendeeIds.Count, User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-        //         return StatusCode(500, new ErrorResponseDto("An error occurred while checking bulk attendee availability"));
-        //     }
-        // }
-        
         [HttpGet("appointment/{appointmentId}")]
         public async Task<ActionResult<List<AttendeeResponseDto>>> GetAppointmentAttendees(Guid appointmentId)
         {

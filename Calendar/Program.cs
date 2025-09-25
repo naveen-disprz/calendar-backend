@@ -53,12 +53,28 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+Environment.SetEnvironmentVariable(
+    "PASSWORD_SECRET_KEY", 
+    "YourPasswordSecretKeyThatIsAlsoVeryLongAndSecure123456"
+);
+
 // Database Configuration
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+var jwtSecretKey = GetJwtSecretKey(builder.Configuration);
+
+string GetJwtSecretKey(IConfiguration config)
+{
+#if DEBUG
+    // For tests/dev fallback
+    return config["JWT_SECRET_KEY"] ?? "YourSuperSecretKeyThatIsAtLeast32CharactersLong12345";
+#else
+    return config["JWT_SECRET_KEY"] ?? throw new InvalidOperationException("JWT SecretKey not configured");
+#endif
+}
+
 // JWT Configuration - Now it will use JWT_SECRET_KEY from .env if available
-var jwtSecretKey = builder.Configuration["JWT_SECRET_KEY"] ?? builder.Configuration["JwtSettings:SecretKey"];
 if (string.IsNullOrEmpty(jwtSecretKey))
 {
     throw new InvalidOperationException("JWT SecretKey not configured");
@@ -88,18 +104,12 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
-if (builder.Environment.IsDevelopment())
-{
-    // In development, use Scoped to pick up .env changes without restart
-    builder.Services.AddScoped<JwtHelper>();
-    builder.Services.AddScoped<PasswordHasher>();
-}
-else
-{
-    // In production, use Singleton for performance
-    builder.Services.AddSingleton<JwtHelper>();
-    builder.Services.AddSingleton<PasswordHasher>();
-}
+
+// In production, use Singleton for performance
+builder.Services.AddSingleton<JwtHelper>();
+builder.Services.AddSingleton<PasswordHasher>();
+// builder.Services.AddSingleton<IJwtHelper, JwtHelper>();
+
 
 // Scoped pros
 //     DbContext Compatibility - DbContext is scoped, DAL can safely use it
@@ -158,3 +168,10 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+namespace Calendar
+{
+    public partial class Program
+    {
+    }
+}

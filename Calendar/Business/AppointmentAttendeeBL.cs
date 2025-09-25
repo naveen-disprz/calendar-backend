@@ -35,7 +35,6 @@ public class AppointmentAttendeeBL : IAppointmentAttendeeBL
                 FirstName = u.FirstName,
                 LastName = u.LastName,
                 FullName = $"{u.FirstName} {u.LastName}",
-                DisplayName = $"{u.FirstName} {u.LastName}",
                 Email = u.Email,
             }).ToList();
         }
@@ -87,7 +86,6 @@ public class AppointmentAttendeeBL : IAppointmentAttendeeBL
                     FirstName = attendee.FirstName,
                     LastName = attendee.LastName,
                     FullName = $"{attendee.FirstName} {attendee.LastName}",
-                    DisplayName = $"{attendee.FirstName} {attendee.LastName}",
                 },
                 RequestedStartTime = request.StartDateTime,
                 RequestedEndTime = request.EndDateTime,
@@ -102,67 +100,6 @@ public class AppointmentAttendeeBL : IAppointmentAttendeeBL
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error checking availability for attendee {AttendeeId}", request.AttendeeId);
-            throw;
-        }
-    }
-
-    public async Task<BulkAvailabilityResponseDto> CheckBulkAttendeeAvailabilityAsync(
-        BulkAvailabilityRequestDto request)
-    {
-        try
-        {
-            var availabilities = new List<AvailabilityResponseDto>();
-
-            foreach (var attendeeId in request.AttendeeIds)
-            {
-                var availabilityRequest = new CheckAvailabilityRequestDto
-                {
-                    StartDateTime = request.StartDateTime,
-                    EndDateTime = request.EndDateTime,
-                    AttendeeId = attendeeId,
-                    ExcludeAppointmentId = request.ExcludeAppointmentId
-                };
-
-                try
-                {
-                    var availability = await CheckAttendeeAvailabilityAsync(availabilityRequest);
-                    availabilities.Add(availability);
-                }
-                catch (ArgumentException ex)
-                {
-                    // Handle case where attendee doesn't exist
-                    availabilities.Add(new AvailabilityResponseDto
-                    {
-                        IsAvailable = false,
-                        Message = ex.Message,
-                        Attendee = new AttendeeResponseDto { Id = attendeeId },
-                        RequestedStartTime = request.StartDateTime,
-                        RequestedEndTime = request.EndDateTime
-                    });
-                }
-            }
-
-            var availableCount = availabilities.Count(a => a.IsAvailable);
-            var unavailableCount = availabilities.Count - availableCount;
-
-            var response = new BulkAvailabilityResponseDto
-            {
-                AttendeeAvailabilities = availabilities,
-                AllAvailable = availableCount == availabilities.Count,
-                AvailableCount = availableCount,
-                UnavailableCount = unavailableCount,
-                RequestedStartTime = request.StartDateTime,
-                RequestedEndTime = request.EndDateTime
-            };
-
-            _logger.LogInformation("Bulk availability check: {Available}/{Total} attendees available",
-                availableCount, availabilities.Count);
-
-            return response;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error checking bulk availability for {Count} attendees", request.AttendeeIds.Count);
             throw;
         }
     }
@@ -191,7 +128,6 @@ public class AppointmentAttendeeBL : IAppointmentAttendeeBL
                 FirstName = aa.User.FirstName,
                 LastName = aa.User.LastName,
                 FullName = aa.User.FullName,
-                DisplayName = aa.User.DisplayName,
             }).ToList();
         }
         catch (Exception ex)

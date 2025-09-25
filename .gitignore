@@ -2,3 +2,7 @@
 Calendar/bin
 Calendar/obj
 Calendar/.env
+Calendar.Tests/bin
+Calendar.Tests/obj
+Calendar.Tests/TestResults
+Calendar.Tests/coveragereport

@@ -8,7 +8,6 @@ public class AttendeeResponseDto
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
     public string FullName { get; set; } = string.Empty;
-    public string DisplayName { get; set; } = string.Empty;
 }
 
 // Check Availability Request DTO
@@ -25,24 +24,6 @@ public class AvailabilityResponseDto
     public bool IsAvailable { get; set; }
     public string Message { get; set; } = string.Empty;
     public AttendeeResponseDto Attendee { get; set; } = new();
-    public DateTime RequestedStartTime { get; set; }
-    public DateTime RequestedEndTime { get; set; }
-}
-
-public class BulkAvailabilityRequestDto
-{
-    public DateTime StartDateTime { get; set; }
-    public DateTime EndDateTime { get; set; }
-    public List<Guid> AttendeeIds { get; set; } = new();
-    public Guid? ExcludeAppointmentId { get; set; }
-}
-
-public class BulkAvailabilityResponseDto
-{
-    public List<AvailabilityResponseDto> AttendeeAvailabilities { get; set; } = new();
-    public bool AllAvailable { get; set; }
-    public int AvailableCount { get; set; }
-    public int UnavailableCount { get; set; }
     public DateTime RequestedStartTime { get; set; }
     public DateTime RequestedEndTime { get; set; }
 }

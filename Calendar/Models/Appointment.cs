@@ -39,14 +39,7 @@ public class Appointment
     public virtual ICollection<AppointmentAttendee> Attendees { get; set; } = new List<AppointmentAttendee>();
 
     // Computed Properties
-    [NotMapped] public TimeSpan Duration => EndDateTime - StartDateTime;
-
     [NotMapped] public bool IsRecurring => RecurrenceRuleId != null;
-
-    [NotMapped]
-    public bool IsAllDay => StartDateTime.TimeOfDay == TimeSpan.Zero &&
-                            EndDateTime.TimeOfDay == TimeSpan.Zero &&
-                            Duration.Days >= 1;
 
     [NotMapped]
     public string FormattedTimeRange =>
@@ -57,27 +50,5 @@ public class Appointment
         StartDateTime.Date == EndDateTime.Date
             ? $"{StartDateTime:MMM dd, yyyy} {FormattedTimeRange}"
             : $"{StartDateTime:MMM dd, yyyy HH:mm} - {EndDateTime:MMM dd, yyyy HH:mm}";
-
-    // Helper Methods
-    public bool HasConflictWith(Appointment other)
-    {
-        return StartDateTime < other.EndDateTime && EndDateTime > other.StartDateTime;
-    }
-
-    public bool IsOnDate(DateTime date)
-    {
-        var dateOnly = date.Date;
-        return StartDateTime.Date <= dateOnly && EndDateTime.Date >= dateOnly;
-    }
-
-    public List<User> GetAllAttendees()
-    {
-        var attendeeUsers = Attendees.Select(a => a.User).ToList();
-        if (!attendeeUsers.Any(u => u.Id == OrganizerId))
-        {
-            attendeeUsers.Add(Organizer);
-        }
-
-        return attendeeUsers;
-    }
+    
 }

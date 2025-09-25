@@ -250,8 +250,8 @@ public class AppDbContext : DbContext
                 }
                 else if (entry.Entity is AppointmentAttendee attendee)
                 {
-                    if (entry.State == EntityState.Added)
-                        attendee.CreatedAt = DateTime.UtcNow;
+                    // if (entry.State == EntityState.Added)
+                        // attendee.CreatedAt = DateTime.UtcNow;
                     attendee.UpdatedAt = DateTime.UtcNow;
                 }
             }

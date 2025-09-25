@@ -32,6 +32,4 @@ public class User
 
     // Computed Properties
     [NotMapped] public string FullName => $"{FirstName} {LastName}";
-
-    [NotMapped] public string DisplayName => $"{FirstName} {LastName} ({Email})";
 }

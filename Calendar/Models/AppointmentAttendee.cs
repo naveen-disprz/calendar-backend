@@ -21,7 +21,4 @@ public class AppointmentAttendee
     [ForeignKey("AppointmentId")] public virtual Appointment Appointment { get; set; } = null!;
 
     [ForeignKey("UserId")] public virtual User User { get; set; } = null!;
-
-    // Computed Properties
-    [NotMapped] public string Role => IsOrganizer ? "Organizer" : "Attendee";
 }

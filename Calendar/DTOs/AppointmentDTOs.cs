@@ -21,39 +21,6 @@ public class CreateAppointmentRequestDto
 
     // Recurrence properties (optional)
     public RecurrenceRequestDto? Recurrence { get; set; }
-
-    // Custom validation method
-    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-    {
-        var results = new List<ValidationResult>();
-
-        // Validate date range
-        if (StartDateTime >= EndDateTime)
-        {
-            results.Add(new ValidationResult(
-                "End date and time must be after start date and time.",
-                new[] { nameof(EndDateTime) }));
-        }
-
-        // Validate start time is not in the past (optional business rule)
-        if (StartDateTime < DateTime.UtcNow.AddMinutes(-5)) // 5-minute grace period
-        {
-            results.Add(new ValidationResult(
-                "Start date and time cannot be in the past.",
-                new[] { nameof(StartDateTime) }));
-        }
-
-        // Validate maximum duration (optional business rule - e.g., 8 hours)
-        var duration = EndDateTime - StartDateTime;
-        if (duration.TotalHours > 8)
-        {
-            results.Add(new ValidationResult(
-                "Appointment duration cannot exceed 8 hours.",
-                new[] { nameof(EndDateTime) }));
-        }
-
-        return results;
-    }
 }
 
 // Recurrence Request (for recurring appointments)
@@ -69,37 +36,6 @@ public class RecurrenceRequestDto
 
     public DateTime? EndDate { get; set; }
 
-    // Custom validation
-    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-    {
-        var results = new List<ValidationResult>();
-
-        // Validate days of week for weekly frequency
-        if (Frequency == "WEEKLY" && !DaysOfWeek.Any())
-        {
-            results.Add(new ValidationResult(
-                "Days of week must be specified for weekly recurrence.",
-                new[] { nameof(DaysOfWeek) }));
-        }
-
-        // Validate days of month for monthly frequency
-        if (Frequency == "MONTHLY" && !DaysOfMonth.Any())
-        {
-            results.Add(new ValidationResult(
-                "Days of month must be specified for monthly recurrence.",
-                new[] { nameof(DaysOfMonth) }));
-        }
-
-        // Validate days of month range
-        if (DaysOfMonth.Any(d => d < 1 || d > 31))
-        {
-            results.Add(new ValidationResult(
-                "Days of month must be between 1 and 31.",
-                new[] { nameof(DaysOfMonth) }));
-        }
-
-        return results;
-    }
 }
 
 // Update Appointment Request

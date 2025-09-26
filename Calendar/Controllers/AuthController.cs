@@ -48,7 +48,7 @@ namespace Calendar.Controllers
 
                 _logger.LogInformation("User signup successful: {Email}", request.Email);
 
-                return StatusCode(StatusCodes.Status201Created, result);
+                return StatusCode(StatusCodes.Status201Created);
             }
             catch (InvalidOperationException ex)
             {
@@ -101,5 +101,24 @@ namespace Calendar.Controllers
                 // return StatusCode(500, new ErrorResponseDto(ex.Message));
             }
         }
+        
+        [HttpPost("logout")]
+public IActionResult LogoutAsync()
+{
+    try
+    {
+        // Clear the auth cookie by setting it with an expired date
+        _cookieHelper?.ClearAuthenticationCookie();
+
+        _logger.LogInformation("User logged out successfully");
+
+        return Ok(new { message = "Logout successful" });
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Logout failed");
+        return StatusCode(500, new ErrorResponseDto("An error occurred during logout"));
+    }
+}
     }
 }

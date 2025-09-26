@@ -121,7 +121,7 @@ builder.Services.AddAuthentication(options =>
 // In production, use Singleton for performance
 builder.Services.AddSingleton<JwtHelper>();
 builder.Services.AddSingleton<PasswordHasher>();
-// builder.Services.AddSingleton<ICookieHelper, CookieHelper>();
+builder.Services.AddScoped<ICookieHelper, CookieHelper>();
 // builder.Services.AddSingleton<IJwtHelper, JwtHelper>();
 
 // Scoped pros
@@ -149,6 +149,7 @@ builder.Services.AddScoped<IAppointmentAttendeeDAL, AppointmentAttendeeDAL>();
 builder.Services.AddScoped<IAppointmentTypeDAL, AppointmentTypeDAL>();
 
 
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowLocalhost3000", policy =>
@@ -165,6 +166,7 @@ builder.Services.AddCors(options =>
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 

@@ -2,6 +2,8 @@
 
 using System.Diagnostics.CodeAnalysis;
 
+namespace Calendar.Utils;
+
 [ExcludeFromCodeCoverage]
 public class CookieHelper : ICookieHelper
 {
@@ -16,14 +18,15 @@ public class CookieHelper : ICookieHelper
 
     public void SetAuthenticationCookie(string token, DateTime expiresAt)
     {
+        Console.WriteLine(token);
         var context = _httpContextAccessor.HttpContext;
         if (context == null) return;
 
         var cookieOptions = new CookieOptions
         {
-            HttpOnly = true,
+            HttpOnly = false,
             Secure = true,
-            SameSite = SameSiteMode.Strict,
+            SameSite = SameSiteMode.Lax,
             Expires = expiresAt
         };
 
